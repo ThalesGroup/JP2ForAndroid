@@ -1,0 +1,12 @@
+.gradle
+local.properties
+build
+captures
+.externalNativeBuild
+.idea
+library/build
+library/.externalNativeBuild
+library/makecmakelist.bat
+testapp/build
+testapp/.externalNativeBuild
+*.iml

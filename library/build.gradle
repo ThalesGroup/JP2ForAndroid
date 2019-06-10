@@ -1,0 +1,64 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 27
+        versionName "1.0"
+        versionCode 1
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:support-annotations:27.1.1'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+}
+
+/*************************************************************/
+/******************* PUBLISHING STUFF ************************/
+/*************************************************************/
+//create a sources jar
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
+}
+
+//publish to a local Maven repository with the sources jar and all dependencies
+publishing {
+    publications {
+        aarRelease(MavenPublication) {
+            groupId 'com.gemalto.jp2'
+            artifactId 'jp2-android'
+            version "${android.defaultConfig.versionName}"
+            artifact(sourceJar)
+            artifact("build/outputs/aar/library-release.aar")
+        }
+    }
+    repositories {
+        maven {
+            url 'build/repo'
+        }
+    }
+}
+
