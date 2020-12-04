@@ -8,6 +8,7 @@ build
 captures
 .externalNativeBuild
 .idea
+library/.cxx
 library/build
 library/.externalNativeBuild
 library/makecmakelist.bat
