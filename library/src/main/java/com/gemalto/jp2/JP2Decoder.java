@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
@@ -129,6 +130,7 @@ public class JP2Decoder {
      * @return {@code true} if the beginning looks like a JPEG-2000 header; {@code false} otherwise
      */
     public static boolean isJPEG2000(byte[] data) {
+        if (data == null) return false;
         if (startsWith(data, JP2_RFC3745_MAGIC)) return true;
         if (startsWith(data, JP2_MAGIC)) return true;
         if (startsWith(data, J2K_CODESTREAM_MAGIC)) return true;
@@ -234,7 +236,8 @@ public class JP2Decoder {
     }
 
     //does array1 start with contents of array2?
-    private static boolean startsWith(byte[] array1, byte[] array2) {
+    private static boolean startsWith(@NonNull byte[] array1, @NonNull byte[] array2) {
+        if (array1.length < array2.length) return false;
         for (int i = 0; i < array2.length; i++) {
             if (array1[i] != array2[i]) return false;
         }
