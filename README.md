@@ -5,7 +5,7 @@ An open-source JPEG-2000 image encoder/decoder for Android based on [OpenJPEG](h
 ## Set up
 Add dependency to your `build.gradle`:
 ```groovy
-implementation 'com.gemalto.jp2:jp2-android:1.0.1'
+implementation 'com.gemalto.jp2:jp2-android:1.0.2'
 ```
 
 ## Basic Usage

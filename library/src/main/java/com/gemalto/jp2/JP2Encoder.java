@@ -1,13 +1,12 @@
 package com.gemalto.jp2;
 
 import android.graphics.Bitmap;
-import android.support.annotation.IntDef;
 import android.util.Log;
+
+import androidx.annotation.IntDef;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,7 +35,6 @@ public class JP2Encoder {
     public static final int FORMAT_JP2 = 1;
 
     @IntDef({FORMAT_J2K, FORMAT_JP2})
-    @Retention(RetentionPolicy.SOURCE)
     public @interface OutputFormat {}
 
     private int numResolutions = DEFAULT_NUM_RESOLUTIONS;
@@ -48,7 +46,7 @@ public class JP2Encoder {
         System.loadLibrary("openjpeg");
     }
 
-    private Bitmap bmp;
+    private final Bitmap bmp;
 
     //TODO in case of update to a newer version of OpenJPEG, check if it still throws error in case of too high resolution number
     //minimum resolutions supported by OpenJPEG 2.3.0
@@ -56,7 +54,7 @@ public class JP2Encoder {
     //maximum resolutions supported by OpenJPEG 2.3.0
     private static final int MAX_RESOLUTIONS_GLOBAL = 32;
     //maximum resolutions possible to create with the given image dimensions [ = floor(log2(min_image_dimension)) + 1]
-    private int maxResolutions;
+    private final int maxResolutions;
 
     /**
      * Creates a new instance of the JPEG-2000 encoder.

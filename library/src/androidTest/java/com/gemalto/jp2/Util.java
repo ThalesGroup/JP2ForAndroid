@@ -14,7 +14,7 @@ import java.io.InputStream;
 import static org.junit.Assert.*;
 
 public class Util {
-    private Context ctx;
+    private final Context ctx;
 
     public Util(final Context base) {
         this.ctx = base;

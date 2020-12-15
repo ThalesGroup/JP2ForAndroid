@@ -4,13 +4,13 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 30
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
-        versionName "1.0.1"
-        versionCode 2
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        targetSdkVersion 30
+        versionName "1.0.2"
+        versionCode 3
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
                 cppFlags ""
@@ -27,15 +27,15 @@ android {
             path "CMakeLists.txt"
         }
     }
-    ndkVersion '21.0.6113669'
+    ndkVersion '22.0.7026061'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:support-annotations:27.1.1'
-    testImplementation 'junit:junit:4.13.1'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'androidx.annotation:annotation:1.1.0'
+    //testImplementation 'junit:junit:4.13.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
 
 /*************************************************************/
@@ -78,7 +78,7 @@ ext {
     siteUrl = 'https://github.com/gemalto/JP2ForAndroid'
     gitUrl = 'https://github.com/gemalto/JP2ForAndroid.git'
 
-    libraryVersion = '1.0.1'
+    libraryVersion = '1.0.2'
 
     developerId = 'michal-dvorak-thales'
     developerName = 'Michal Dvorak'

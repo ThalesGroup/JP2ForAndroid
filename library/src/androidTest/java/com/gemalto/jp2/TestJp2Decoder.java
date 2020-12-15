@@ -2,8 +2,9 @@ package com.gemalto.jp2;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class TestJp2Decoder {
 
     @Before
     public void init() {
-        ctx = InstrumentationRegistry.getTargetContext();
+        ctx = ApplicationProvider.getApplicationContext();
         util = new Util(ctx);
     }
 
