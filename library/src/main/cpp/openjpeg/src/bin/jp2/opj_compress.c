@@ -229,6 +229,8 @@ static void encode_help_display(void)
     fprintf(stdout, "    Write SOP marker before each packet.\n");
     fprintf(stdout, "-EPH\n");
     fprintf(stdout, "    Write EPH marker after each header packet.\n");
+    fprintf(stdout, "-PLT\n");
+    fprintf(stdout, "    Write PLT marker in tile-part header.\n");
     fprintf(stdout, "-M <key value>\n");
     fprintf(stdout, "    Mode switch.\n");
     fprintf(stdout, "    [1=BYPASS(LAZY) 2=RESET 4=RESTART(TERMALL)\n");
@@ -287,11 +289,22 @@ static void encode_help_display(void)
     fprintf(stdout, "-cinema4K\n");
     fprintf(stdout, "    Digital Cinema 4K profile compliant codestream.\n");
     fprintf(stdout, "	Frames per second not required. Default value is 24fps.\n");
+    fprintf(stdout, "-IMF <PROFILE>[,mainlevel=X][,sublevel=Y][,framerate=FPS]\n");
+    fprintf(stdout, "    Interoperable Master Format compliant codestream.\n");
+    fprintf(stdout, "    <PROFILE>=2K, 4K, 8K, 2K_R, 4K_R or 8K_R.\n");
+    fprintf(stdout, "    X >= 0 and X <= 11.\n");
+    fprintf(stdout, "    Y >= 0 and Y <= 9.\n");
+    fprintf(stdout,
+            "    framerate > 0 may be specified to enhance checks and set maximum bit rate when Y > 0.\n");
     fprintf(stdout, "-jpip\n");
     fprintf(stdout, "    Write jpip codestream index box in JP2 output file.\n");
     fprintf(stdout, "    Currently supports only RPCL order.\n");
     fprintf(stdout, "-C <comment>\n");
     fprintf(stdout, "    Add <comment> in the comment marker segment.\n");
+    if (opj_has_thread_support()) {
+        fprintf(stdout, "  -threads <num_threads|ALL_CPUS>\n"
+                "    Number of threads to use for encoding or ALL_CPUS for all available cores.\n");
+    }
     /* UniPG>> */
 #ifdef USE_JPWL
     fprintf(stdout, "-W <params>\n");
@@ -568,7 +581,10 @@ static char get_next_file(int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
 static int parse_cmdline_encoder(int argc, char **argv,
                                  opj_cparameters_t *parameters,
                                  img_fol_t *img_fol, raw_cparameters_t *raw_cp, char *indexfilename,
-                                 size_t indexfilename_size)
+                                 size_t indexfilename_size,
+                                 int* pOutFramerate,
+                                 OPJ_BOOL* pOutPLT,
+                                 int* pOutNumThreads)
 {
     OPJ_UINT32 i, j;
     int totlen, c;
@@ -583,7 +599,10 @@ static int parse_cmdline_encoder(int argc, char **argv,
         {"POC", REQ_ARG, NULL, 'P'},
         {"ROI", REQ_ARG, NULL, 'R'},
         {"jpip", NO_ARG, NULL, 'J'},
-        {"mct", REQ_ARG, NULL, 'Y'}
+        {"mct", REQ_ARG, NULL, 'Y'},
+        {"IMF", REQ_ARG, NULL, 'Z'},
+        {"PLT", NO_ARG, NULL, 'A'},
+        {"threads",   REQ_ARG, NULL, 'B'}
     };
 
     /* parse the command line */
@@ -1129,6 +1148,98 @@ static int parse_cmdline_encoder(int argc, char **argv,
 
         /* ------------------------------------------------------ */
 
+        case 'Z': {         /* IMF profile*/
+            int mainlevel = 0;
+            int sublevel = 0;
+            int profile = 0;
+            int framerate = 0;
+            const char* msg =
+                "Wrong value for -IMF. Should be "
+                "<PROFILE>[,mainlevel=X][,sublevel=Y][,framerate=FPS] where <PROFILE> is one "
+                "of 2K/4K/8K/2K_R/4K_R/8K_R.\n";
+            char* comma;
+
+            comma = strstr(opj_optarg, ",mainlevel=");
+            if (comma && sscanf(comma + 1, "mainlevel=%d", &mainlevel) != 1) {
+                fprintf(stderr, "%s", msg);
+                return 1;
+            }
+
+            comma = strstr(opj_optarg, ",sublevel=");
+            if (comma && sscanf(comma + 1, "sublevel=%d", &sublevel) != 1) {
+                fprintf(stderr, "%s", msg);
+                return 1;
+            }
+
+            comma = strstr(opj_optarg, ",framerate=");
+            if (comma && sscanf(comma + 1, "framerate=%d", &framerate) != 1) {
+                fprintf(stderr, "%s", msg);
+                return 1;
+            }
+
+            comma = strchr(opj_optarg, ',');
+            if (comma != NULL) {
+                *comma = 0;
+            }
+
+            if (strcmp(opj_optarg, "2K") == 0) {
+                profile = OPJ_PROFILE_IMF_2K;
+            } else if (strcmp(opj_optarg, "4K") == 0) {
+                profile = OPJ_PROFILE_IMF_4K;
+            } else if (strcmp(opj_optarg, "8K") == 0) {
+                profile = OPJ_PROFILE_IMF_8K;
+            } else if (strcmp(opj_optarg, "2K_R") == 0) {
+                profile = OPJ_PROFILE_IMF_2K_R;
+            } else if (strcmp(opj_optarg, "4K_R") == 0) {
+                profile = OPJ_PROFILE_IMF_4K_R;
+            } else if (strcmp(opj_optarg, "8K_R") == 0) {
+                profile = OPJ_PROFILE_IMF_8K_R;
+            } else {
+                fprintf(stderr, "%s", msg);
+                return 1;
+            }
+
+            if (!(mainlevel >= 0 && mainlevel <= 15)) {
+                /* Voluntarily rough validation. More fine grained done in library */
+                fprintf(stderr, "Invalid mainlevel value.\n");
+                return 1;
+            }
+            if (!(sublevel >= 0 && sublevel <= 15)) {
+                /* Voluntarily rough validation. More fine grained done in library */
+                fprintf(stderr, "Invalid sublevel value.\n");
+                return 1;
+            }
+            parameters->rsiz = (OPJ_UINT16)(profile | (sublevel << 4) | mainlevel);
+
+            fprintf(stdout, "IMF profile activated\n"
+                    "Other options specified could be overridden\n");
+
+            if (pOutFramerate) {
+                *pOutFramerate = framerate;
+            }
+            if (framerate > 0 && sublevel > 0 && sublevel <= 9) {
+                const int limitMBitsSec[] = {
+                    0,
+                    OPJ_IMF_SUBLEVEL_1_MBITSSEC,
+                    OPJ_IMF_SUBLEVEL_2_MBITSSEC,
+                    OPJ_IMF_SUBLEVEL_3_MBITSSEC,
+                    OPJ_IMF_SUBLEVEL_4_MBITSSEC,
+                    OPJ_IMF_SUBLEVEL_5_MBITSSEC,
+                    OPJ_IMF_SUBLEVEL_6_MBITSSEC,
+                    OPJ_IMF_SUBLEVEL_7_MBITSSEC,
+                    OPJ_IMF_SUBLEVEL_8_MBITSSEC,
+                    OPJ_IMF_SUBLEVEL_9_MBITSSEC
+                };
+                parameters->max_cs_size = limitMBitsSec[sublevel] * (1000 * 1000 / 8) /
+                                          framerate;
+                fprintf(stdout, "Setting max codestream size to %d bytes.\n",
+                        parameters->max_cs_size);
+            }
+        }
+        break;
+
+        /* ------------------------------------------------------ */
+
         case 'Y': {         /* Shall we do an MCT ? 0:no_mct;1:rgb->ycc;2:custom mct (-m option required)*/
             int mct_mode = 0;
             sscanf(opj_optarg, "%d", &mct_mode);
@@ -1569,6 +1680,26 @@ static int parse_cmdline_encoder(int argc, char **argv,
         break;
         /* ------------------------------------------------------ */
 
+        case 'A': {         /* PLT markers */
+            *pOutPLT = OPJ_TRUE;
+        }
+        break;
+
+        /* ----------------------------------------------------- */
+        case 'B': { /* Number of threads */
+            if (strcmp(opj_optarg, "ALL_CPUS") == 0) {
+                *pOutNumThreads = opj_get_num_cpus();
+                if (*pOutNumThreads == 1) {
+                    *pOutNumThreads = 0;
+                }
+            } else {
+                sscanf(opj_optarg, "%d", pOutNumThreads);
+            }
+        }
+        break;
+
+        /* ------------------------------------------------------ */
+
 
         default:
             fprintf(stderr, "[WARNING] An invalid option has been ignored\n");
@@ -1744,7 +1875,11 @@ int main(int argc, char **argv)
     OPJ_BOOL bSuccess;
     OPJ_BOOL bUseTiles = OPJ_FALSE; /* OPJ_TRUE */
     OPJ_UINT32 l_nb_tiles = 4;
+    int framerate = 0;
     OPJ_FLOAT64 t = opj_clock();
+
+    OPJ_BOOL PLT = OPJ_FALSE;
+    int num_threads = 0;
 
     /* set encoding parameters to default values */
     opj_set_default_encoder_parameters(&parameters);
@@ -1765,7 +1900,7 @@ int main(int argc, char **argv)
     parameters.tcp_mct = (char)
                          255; /* This will be set later according to the input image or the provided option */
     if (parse_cmdline_encoder(argc, argv, &parameters, &img_fol, &raw_cp,
-                              indexfilename, sizeof(indexfilename)) == 1) {
+                              indexfilename, sizeof(indexfilename), &framerate, &PLT, &num_threads) == 1) {
         ret = 1;
         goto fin;
     }
@@ -1940,6 +2075,41 @@ int main(int argc, char **argv)
             }
         }
 
+        if (OPJ_IS_IMF(parameters.rsiz) && framerate > 0) {
+            const int mainlevel = OPJ_GET_IMF_MAINLEVEL(parameters.rsiz);
+            if (mainlevel > 0 && mainlevel <= OPJ_IMF_MAINLEVEL_MAX) {
+                const int limitMSamplesSec[] = {
+                    0,
+                    OPJ_IMF_MAINLEVEL_1_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_2_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_3_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_4_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_5_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_6_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_7_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_8_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_9_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_10_MSAMPLESEC,
+                    OPJ_IMF_MAINLEVEL_11_MSAMPLESEC
+                };
+                OPJ_UINT32 avgcomponents = image->numcomps;
+                double msamplespersec;
+                if (image->numcomps == 3 &&
+                        image->comps[1].dx == 2 &&
+                        image->comps[1].dy == 2) {
+                    avgcomponents = 2;
+                }
+                msamplespersec = (double)image->x1 * image->y1 * avgcomponents * framerate /
+                                 1e6;
+                if (msamplespersec > limitMSamplesSec[mainlevel]) {
+                    fprintf(stderr,
+                            "Warning: MSamples/sec is %f, whereas limit is %d.\n",
+                            msamplespersec,
+                            limitMSamplesSec[mainlevel]);
+                }
+            }
+        }
+
         /* encode the destination image */
         /* ---------------------------- */
 
@@ -1974,6 +2144,26 @@ int main(int argc, char **argv)
         }
         if (! opj_setup_encoder(l_codec, &parameters, image)) {
             fprintf(stderr, "failed to encode image: opj_setup_encoder\n");
+            opj_destroy_codec(l_codec);
+            opj_image_destroy(image);
+            ret = 1;
+            goto fin;
+        }
+
+        if (PLT) {
+            const char* const options[] = { "PLT=YES", NULL };
+            if (!opj_encoder_set_extra_options(l_codec, options)) {
+                fprintf(stderr, "failed to encode image: opj_encoder_set_extra_options\n");
+                opj_destroy_codec(l_codec);
+                opj_image_destroy(image);
+                ret = 1;
+                goto fin;
+            }
+        }
+
+        if (num_threads >= 1 &&
+                !opj_codec_set_threads(l_codec, num_threads)) {
+            fprintf(stderr, "failed to set number of threads\n");
             opj_destroy_codec(l_codec);
             opj_image_destroy(image);
             ret = 1;

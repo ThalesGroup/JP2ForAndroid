@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 30
-        versionName "1.0.2"
-        versionCode 3
+        versionName "1.0.3"
+        versionCode 4
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -78,7 +78,7 @@ ext {
     siteUrl = 'https://github.com/gemalto/JP2ForAndroid'
     gitUrl = 'https://github.com/gemalto/JP2ForAndroid.git'
 
-    libraryVersion = '1.0.2'
+    libraryVersion = "${android.defaultConfig.versionName}"
 
     developerId = 'michal-dvorak-thales'
     developerName = 'Michal Dvorak'

@@ -465,6 +465,7 @@ int imagetotga(opj_image_t * image, const char *outfile)
                 || (image->comps[0].prec != image->comps[i + 1].prec)) {
             fprintf(stderr,
                     "Unable to create a tga file with such J2K image charateristics.");
+            fclose(fdest);
             return 1;
         }
     }
@@ -478,6 +479,7 @@ int imagetotga(opj_image_t * image, const char *outfile)
     /* Write TGA header  */
     bpp = write_alpha ? 32 : 24;
     if (!tga_writeheader(fdest, bpp, width, height, OPJ_TRUE)) {
+        fclose(fdest);
         return 1;
     }
 
@@ -510,6 +512,7 @@ int imagetotga(opj_image_t * image, const char *outfile)
             res = fwrite(&value, 1, 1, fdest);
             if (res < 1) {
                 fprintf(stderr, "failed to write 1 byte for %s\n", outfile);
+                fclose(fdest);
                 return 1;
             }
 
@@ -517,6 +520,7 @@ int imagetotga(opj_image_t * image, const char *outfile)
             res = fwrite(&value, 1, 1, fdest);
             if (res < 1) {
                 fprintf(stderr, "failed to write 1 byte for %s\n", outfile);
+                fclose(fdest);
                 return 1;
             }
 
@@ -524,6 +528,7 @@ int imagetotga(opj_image_t * image, const char *outfile)
             res = fwrite(&value, 1, 1, fdest);
             if (res < 1) {
                 fprintf(stderr, "failed to write 1 byte for %s\n", outfile);
+                fclose(fdest);
                 return 1;
             }
 
@@ -533,11 +538,14 @@ int imagetotga(opj_image_t * image, const char *outfile)
                 res = fwrite(&value, 1, 1, fdest);
                 if (res < 1) {
                     fprintf(stderr, "failed to write 1 byte for %s\n", outfile);
+                    fclose(fdest);
                     return 1;
                 }
             }
         }
     }
+
+    fclose(fdest);
 
     return 0;
 }
@@ -832,6 +840,7 @@ opj_image_t* bmptoimage(const char *filename, opj_cparameters_t *parameters)
         RGB = (unsigned char *) malloc(W * H * sizeof(unsigned char));
 
         if (fread(RGB, sizeof(unsigned char), W * H, IN) != W * H) {
+            fclose(IN);
             free(table_R);
             free(table_G);
             free(table_B);
@@ -1488,7 +1497,7 @@ int imagetopgx(opj_image_t * image, const char *outfile)
         const size_t olen = strlen(outfile);
         const size_t dotpos = olen - 4;
         const size_t total = dotpos + 1 + 1 + 4; /* '-' + '[1-3]' + '.pgx' */
-        if (outfile[dotpos] != '.') {
+        if (olen < 4 || outfile[dotpos] != '.') {
             /* `pgx` was recognized but there is no dot at expected position */
             fprintf(stderr, "ERROR -> Impossible happen.");
             return 1;
@@ -1505,6 +1514,7 @@ int imagetopgx(opj_image_t * image, const char *outfile)
         fdest = fopen(name, "wb");
         if (!fdest) {
             fprintf(stderr, "ERROR -> failed to open %s for writing\n", name);
+            free(name);
             return 1;
         }
         /* don't need name anymore */
