@@ -108,6 +108,28 @@ Bitmap lowQualityBmp = new JP2Decoder(jp2data)
                               .decode();
 ```
 
+### Source Decode Region
+Sets the region of the source image that should be decoded. The region will be clipped to the 
+dimensions of the source image. Setting this value to null will result in the entire image
+ being decoded.
+
+#### Decoding
+You can obtain the width/height of image by calling
+the `readHeader()` method:
+```java
+Header header = new JP2Decoder(jp2data).readHeader();
+int imgWidth = header.width;
+int imgHeight = header.height;
+```
+
+If you don't want to decode the entire image, you can set the source region to be decode.
+```java
+Bitmap partOfBmp = new JP2Decoder(jp2data)
+                              .setSourceRegion(Rect(0,0,imgWidth/2,imgHeight/2))
+                              .decode();
+```
+
+
 ### File Format
 `JP2Encoder` supports two output formats:
 * JP2 - standard JPEG-2000 file format (encapsulating a JPEG-2000 codestream)
