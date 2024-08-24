@@ -3,6 +3,8 @@ plugins {
     id 'maven-publish'
 }
 
+def versionName = "1.0.3"
+
 android {
     namespace = "com.gemalto.jp2"
 
@@ -58,7 +60,7 @@ publishing {
         aarRelease(MavenPublication) {
             groupId 'com.gemalto.jp2'
             artifactId 'jp2-android'
-            version "${android.defaultConfig.versionName}"
+            version "${versionName}"
             artifact(sourceJar)
             artifact("build/outputs/aar/library-release.aar")
         }
@@ -80,7 +82,7 @@ ext {
     siteUrl = 'https://github.com/gemalto/JP2ForAndroid'
     gitUrl = 'https://github.com/gemalto/JP2ForAndroid.git'
 
-    libraryVersion = "${android.defaultConfig.versionName}"
+    libraryVersion = "${versionName}"
 
     developerId = 'michal-dvorak-thales'
     developerName = 'Michal Dvorak'
