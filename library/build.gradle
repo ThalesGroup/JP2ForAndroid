@@ -55,6 +55,10 @@ task sourceJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
+tasks.withType(AbstractPublishToMaven) {
+    dependsOn assemble
+}
+
 //publish to a local Maven repository with the sources jar and all dependencies
 publishing {
     publications {
@@ -62,8 +66,33 @@ publishing {
             groupId 'com.gemalto.jp2'
             artifactId 'jp2-android'
             version "${versionName}"
+
+            from components.findByName('release')
             artifact(sourceJar)
-            artifact("build/outputs/aar/library-release.aar")
+
+            pom {
+                name = 'JP2ForAndroid'
+                description = 'A JPEG-2000 image encoder/decoder for Android'
+                url = 'https://github.com/gemalto/JP2ForAndroid'
+                licenses {
+                    license {
+                        name = 'The 2-Clause BSD License'
+                        url = 'https://opensource.org/licenses/BSD-2-Clause'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'michal-dvorak-thales'
+                        name = 'Michal Dvorak'
+                        email = 'michal.dvorak@thalesgroup.com'
+                    }
+                }
+                scm {
+                    connection = 'https://github.com/gemalto/JP2ForAndroid.git'
+                    developerConnection = 'https://github.com/gemalto/JP2ForAndroid.git'
+                    url = 'https://github.com/gemalto/JP2ForAndroid'
+                }
+            }
         }
     }
     repositories {
@@ -71,25 +100,4 @@ publishing {
             url 'build/repo'
         }
     }
-}
-
-ext {
-    publishedGroupId = 'com.gemalto.jp2'
-    libraryName = 'JP2ForAndroid'
-    artifact = 'jp2-android'
-
-    libraryDescription = 'A JPEG-2000 image encoder/decoder for Android'
-
-    siteUrl = 'https://github.com/gemalto/JP2ForAndroid'
-    gitUrl = 'https://github.com/gemalto/JP2ForAndroid.git'
-
-    libraryVersion = "${versionName}"
-
-    developerId = 'michal-dvorak-thales'
-    developerName = 'Michal Dvorak'
-    developerEmail = 'michal.dvorak@thalesgroup.com'
-
-    licenseName = 'The 2-Clause BSD License'
-    licenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
-    allLicenses = ["BSD-2-Clause"]
 }
