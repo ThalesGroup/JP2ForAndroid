@@ -55,6 +55,22 @@ task sourceJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+task javadoc(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.sourceFiles
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
 tasks.withType(AbstractPublishToMaven) {
     dependsOn assemble
 }
@@ -69,6 +85,7 @@ publishing {
 
             from components.findByName('release')
             artifact(sourceJar)
+            artifact(javadocJar)
 
             pom {
                 name = 'JP2ForAndroid'
