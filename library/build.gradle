@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'maven-publish'
+    id 'signing'
 }
 
 def versionName = "1.0.3"
@@ -78,12 +79,12 @@ tasks.withType(AbstractPublishToMaven) {
 //publish to a local Maven repository with the sources jar and all dependencies
 publishing {
     publications {
-        aarRelease(MavenPublication) {
+        release(MavenPublication) {
             groupId 'com.gemalto.jp2'
             artifactId 'jp2-android'
             version "${versionName}"
 
-            from components.findByName('release')
+            artifact("build/outputs/aar/jp2-android-release.aar")
             artifact(sourceJar)
             artifact(javadocJar)
 
@@ -117,4 +118,10 @@ publishing {
             url 'build/repo'
         }
     }
+}
+
+signing {
+    useGpgCmd()
+    sign publishing.publications["release"]
+    signReleasePublication.dependsOn assemble
 }
