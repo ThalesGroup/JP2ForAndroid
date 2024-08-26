@@ -19,41 +19,41 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_JPIP")
 
 add_library(${CMAKE_PROJECT_NAME} SHARED
              # Provides a relative path to your source file(s).
-             openjpeg/src/lib/openjp2/bio.c
-             openjpeg/src/lib/openjp2/cidx_manager.c
-             openjpeg/src/lib/openjp2/cio.c
-             openjpeg/src/lib/openjp2/dwt.c
-             openjpeg/src/lib/openjp2/event.c
-             openjpeg/src/lib/openjp2/function_list.c
-             openjpeg/src/lib/openjp2/image.c
-             openjpeg/src/lib/openjp2/invert.c
-             openjpeg/src/lib/openjp2/j2k.c
-             openjpeg/src/lib/openjp2/jp2.c
-             openjpeg/src/lib/openjp2/mct.c
-             openjpeg/src/lib/openjp2/mqc.c
-             openjpeg/src/lib/openjp2/openjpeg.c
-             openjpeg/src/lib/openjp2/opj_clock.c
-             openjpeg/src/lib/openjp2/opj_malloc.c
-             openjpeg/src/lib/openjp2/phix_manager.c
-             openjpeg/src/lib/openjp2/pi.c
-             openjpeg/src/lib/openjp2/ppix_manager.c
-             openjpeg/src/lib/openjp2/sparse_array.c
-             openjpeg/src/lib/openjp2/t1.c
-             openjpeg/src/lib/openjp2/t2.c
-             openjpeg/src/lib/openjp2/tcd.c
-             openjpeg/src/lib/openjp2/tgt.c
-             openjpeg/src/lib/openjp2/thix_manager.c
-             openjpeg/src/lib/openjp2/thread.c
-             openjpeg/src/lib/openjp2/tpix_manager.c
-             openjpeg/src/bin/common/color.c
-             openjpg.cpp
+             src/main/cpp/openjpeg/src/lib/openjp2/bio.c
+             src/main/cpp/openjpeg/src/lib/openjp2/cidx_manager.c
+             src/main/cpp/openjpeg/src/lib/openjp2/cio.c
+             src/main/cpp/openjpeg/src/lib/openjp2/dwt.c
+             src/main/cpp/openjpeg/src/lib/openjp2/event.c
+             src/main/cpp/openjpeg/src/lib/openjp2/function_list.c
+             src/main/cpp/openjpeg/src/lib/openjp2/image.c
+             src/main/cpp/openjpeg/src/lib/openjp2/invert.c
+             src/main/cpp/openjpeg/src/lib/openjp2/j2k.c
+             src/main/cpp/openjpeg/src/lib/openjp2/jp2.c
+             src/main/cpp/openjpeg/src/lib/openjp2/mct.c
+             src/main/cpp/openjpeg/src/lib/openjp2/mqc.c
+             src/main/cpp/openjpeg/src/lib/openjp2/openjpeg.c
+             src/main/cpp/openjpeg/src/lib/openjp2/opj_clock.c
+             src/main/cpp/openjpeg/src/lib/openjp2/opj_malloc.c
+             src/main/cpp/openjpeg/src/lib/openjp2/phix_manager.c
+             src/main/cpp/openjpeg/src/lib/openjp2/pi.c
+             src/main/cpp/openjpeg/src/lib/openjp2/ppix_manager.c
+             src/main/cpp/openjpeg/src/lib/openjp2/sparse_array.c
+             src/main/cpp/openjpeg/src/lib/openjp2/t1.c
+             src/main/cpp/openjpeg/src/lib/openjp2/t2.c
+             src/main/cpp/openjpeg/src/lib/openjp2/tcd.c
+             src/main/cpp/openjpeg/src/lib/openjp2/tgt.c
+             src/main/cpp/openjpeg/src/lib/openjp2/thix_manager.c
+             src/main/cpp/openjpeg/src/lib/openjp2/thread.c
+             src/main/cpp/openjpeg/src/lib/openjp2/tpix_manager.c
+             src/main/cpp/openjpeg/src/bin/common/color.c
+             src/main/cpp/openjpg.cpp
              )
 
 target_include_directories(${CMAKE_PROJECT_NAME}
         PRIVATE
-        ./
-        openjpeg/src/lib/openjp2
-        openjpeg/src/bin/common
+        src/main/cpp/
+        src/main/cpp/openjpeg/src/lib/openjp2
+        src/main/cpp/openjpeg/src/bin/common
 )
 
 # Searches for a specified prebuilt library and stores the path as a
