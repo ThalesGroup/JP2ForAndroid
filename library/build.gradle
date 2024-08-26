@@ -1,19 +1,24 @@
-apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+def versionName = "1.0.3"
 
 android {
-    compileSdkVersion 30
+    namespace = "com.gemalto.jp2"
+
+    compileSdk 34
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 30
-        versionName "1.0.3"
-        versionCode 4
+        minSdkVersion 21
+        targetSdk 34
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
                 cppFlags ""
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
     }
@@ -22,20 +27,24 @@ android {
             minifyEnabled false
         }
     }
+    buildFeatures {
+        buildConfig = true
+    }
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
+            version "3.22.1"
         }
     }
-    ndkVersion '22.0.7026061'
+    ndkVersion '27.0.12077973'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.annotation:annotation:1.8.2'
     //testImplementation 'junit:junit:4.13.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
 /*************************************************************/
@@ -43,19 +52,65 @@ dependencies {
 /*************************************************************/
 //create a sources jar
 task sourceJar(type: Jar) {
+    archiveClassifier = 'sources'
     from android.sourceSets.main.java.srcDirs
-    classifier 'sources'
+}
+
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+task javadoc(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.sourceFiles
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
+tasks.withType(AbstractPublishToMaven) {
+    dependsOn assemble
 }
 
 //publish to a local Maven repository with the sources jar and all dependencies
 publishing {
     publications {
-        aarRelease(MavenPublication) {
+        release(MavenPublication) {
             groupId 'com.gemalto.jp2'
             artifactId 'jp2-android'
-            version "${android.defaultConfig.versionName}"
+            version "${versionName}"
+
+            artifact("build/outputs/aar/jp2-android-release.aar")
             artifact(sourceJar)
-            artifact("build/outputs/aar/library-release.aar")
+            artifact(javadocJar)
+
+            pom {
+                name = 'JP2ForAndroid'
+                description = 'A JPEG-2000 image encoder/decoder for Android'
+                url = 'https://github.com/gemalto/JP2ForAndroid'
+                licenses {
+                    license {
+                        name = 'The 2-Clause BSD License'
+                        url = 'https://opensource.org/licenses/BSD-2-Clause'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'michal-dvorak-thales'
+                        name = 'Michal Dvorak'
+                        email = 'michal.dvorak@thalesgroup.com'
+                    }
+                }
+                scm {
+                    connection = 'https://github.com/gemalto/JP2ForAndroid.git'
+                    developerConnection = 'https://github.com/gemalto/JP2ForAndroid.git'
+                    url = 'https://github.com/gemalto/JP2ForAndroid'
+                }
+            }
         }
     }
     repositories {
@@ -65,28 +120,8 @@ publishing {
     }
 }
 
-ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'JP2ForAndroid'
-
-    publishedGroupId = 'com.gemalto.jp2'
-    libraryName = 'JP2ForAndroid'
-    artifact = 'jp2-android'
-
-    libraryDescription = 'A JPEG-2000 image encoder/decoder for Android'
-
-    siteUrl = 'https://github.com/gemalto/JP2ForAndroid'
-    gitUrl = 'https://github.com/gemalto/JP2ForAndroid.git'
-
-    libraryVersion = "${android.defaultConfig.versionName}"
-
-    developerId = 'michal-dvorak-thales'
-    developerName = 'Michal Dvorak'
-    developerEmail = 'michal.dvorak@thalesgroup.com'
-
-    licenseName = 'The 2-Clause BSD License'
-    licenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
-    allLicenses = ["BSD-2-Clause"]
+signing {
+    useGpgCmd()
+    sign publishing.publications["release"]
+    signReleasePublication.dependsOn assemble
 }
-
-apply from: 'bintray.gradle'

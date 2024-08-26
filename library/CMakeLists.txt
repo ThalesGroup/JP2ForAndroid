@@ -2,8 +2,13 @@
 # documentation: https://d.android.com/studio/projects/add-native-code.html
 
 # Sets the minimum version of CMake required to build the native library.
-
 cmake_minimum_required(VERSION 3.4.1)
+
+# Declares the project name. The project name can be accessed via ${ PROJECT_NAME},
+# Since this is the top level CMakeLists.txt, the project name is also accessible
+# with ${CMAKE_PROJECT_NAME} (both CMake variables are in-sync within the top level
+# build script scope).
+project("openjpeg")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_JPIP")
 
@@ -12,12 +17,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_JPIP")
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
-add_library( # Sets the name of the library.
-             openjpeg
-
-             # Sets the library as a shared library.
-             SHARED
-
+add_library(${CMAKE_PROJECT_NAME} SHARED
              # Provides a relative path to your source file(s).
              src/main/cpp/openjpeg/src/lib/openjp2/bio.c
              src/main/cpp/openjpeg/src/lib/openjp2/cidx_manager.c
@@ -49,7 +49,12 @@ add_library( # Sets the name of the library.
              src/main/cpp/openjpg.cpp
              )
 
-target_include_directories(openjpeg PRIVATE src/main/cpp src/main/cpp/openjpeg/src/lib/openjp2 src/main/cpp/openjpeg/src/bin/common)
+target_include_directories(${CMAKE_PROJECT_NAME}
+        PRIVATE
+        src/main/cpp/
+        src/main/cpp/openjpeg/src/lib/openjp2
+        src/main/cpp/openjpeg/src/bin/common
+)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -68,9 +73,8 @@ find_library( # Sets the name of the path variable.
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
-target_link_libraries( # Specifies the target library.
-                       openjpeg
+target_link_libraries(${CMAKE_PROJECT_NAME}
 
-                       # Links the target library to the log library
+        # Links the target library to the log library
                        # included in the NDK.
                        ${log-lib} )
