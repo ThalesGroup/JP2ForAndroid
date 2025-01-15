@@ -1,6 +1,6 @@
 # NON-REGRESSION TESTS ON THIS DATASET LOCATED ${OPJ_DATA_ROOT}/input/nonregression
 
-cmake_minimum_required(VERSION 2.8.7)
+cmake_minimum_required(VERSION 3.5)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Temporary)
 
@@ -84,6 +84,7 @@ set(BLACKLIST_JPEG2000
     issue823.jp2 #kdu_jp2info ok
     issue826.jp2 #inspection reveales that the transformation value is out of range
     oss-fuzz2785.jp2 #inspection reveales that the transformation value is out of range
+        issue1438.j2k
    )
 
 file(GLOB_RECURSE OPJ_DATA_NR_LIST
@@ -91,6 +92,8 @@ file(GLOB_RECURSE OPJ_DATA_NR_LIST
      "${INPUT_NR}/*.j2c"
      "${INPUT_NR}/*.jp2"
      "${INPUT_NR}/*.jpc"
+        "${INPUT_NR}/*.jph"
+        "${INPUT_NR}/*.jhc"
      #"${INPUT_NR}/*.jpx"
      )
 

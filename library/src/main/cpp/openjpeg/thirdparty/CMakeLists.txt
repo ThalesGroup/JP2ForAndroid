@@ -1,5 +1,9 @@
 # 3rd party libs
 
+if (NOT BUILD_THIRDPARTY)
+  include(FindPkgConfig)
+endif (NOT BUILD_THIRDPARTY)
+
 #------------
 # Try to find lib Z
 if(BUILD_THIRDPARTY)
@@ -36,6 +40,9 @@ if(BUILD_THIRDPARTY)
 else(BUILD_THIRDPARTY)
   if(ZLIB_FOUND)
     find_package(PNG)
+    # Static only build:
+    #   it is not necessary to invoke pkg_check_module on libpng, because libpng
+    #   only depends on zlib, which is already checked.
     if(PNG_FOUND)
       message(STATUS "Your system seems to have a PNG lib available, we will use it")
       set(OPJ_HAVE_PNG_H 1 PARENT_SCOPE)
@@ -66,12 +73,31 @@ if(BUILD_THIRDPARTY)
   set(OPJ_HAVE_LIBTIFF 1 PARENT_SCOPE)
 else(BUILD_THIRDPARTY)
   find_package(TIFF)
+  # Static only build:
+  #   it is necessary to invoke pkg_check_module on libtiff since it may have
+  #   several other dependencies not declared by its cmake module, but they are
+  #   in the its pkgconfig module.
+  if (PKG_CONFIG_FOUND)
+    foreach (pc_tiff_module tiff tiff3 tiff4 tiff-3 tiff-4 libtiff libtiff3 libtiff4 libtiff-3 libtiff-4)
+      pkg_check_modules(PC_TIFF QUIET ${pc_tiff_module})
+      if (PC_TIFF_FOUND)
+        break()
+      endif (PC_TIFF_FOUND)
+    endforeach ()
+  endif (PKG_CONFIG_FOUND)
   if(TIFF_FOUND)
     message(STATUS "Your system seems to have a TIFF lib available, we will use it")
     set(OPJ_HAVE_TIFF_H 1 PARENT_SCOPE)
     set(OPJ_HAVE_LIBTIFF 1 PARENT_SCOPE)
-    set(TIFF_LIBNAME ${TIFF_LIBRARIES} PARENT_SCOPE)
-    set(TIFF_INCLUDE_DIRNAME ${TIFF_INCLUDE_DIR} PARENT_SCOPE)
+    if (BUILD_STATIC_LIBS AND NOT BUILD_SHARED_LIBS)
+      # Probably incorrect as PC_TIFF_STATIC_LIBRARIES will lack the path to the libraries
+      # and will only work if they are in system directories
+      set(TIFF_LIBNAME ${PC_TIFF_STATIC_LIBRARIES} PARENT_SCOPE)
+      set(TIFF_INCLUDE_DIRNAME ${PC_TIFF_STATIC_INCLUDE_DIRS} PARENT_SCOPE)
+    else ()
+      set(TIFF_LIBNAME ${TIFF_LIBRARIES} PARENT_SCOPE)
+      set(TIFF_INCLUDE_DIRNAME ${TIFF_INCLUDE_DIR} PARENT_SCOPE)
+    endif ()
   else(TIFF_FOUND) # not found
     set(OPJ_HAVE_TIFF_H 0 PARENT_SCOPE)
     set(OPJ_HAVE_LIBTIFF 0 PARENT_SCOPE)
@@ -94,12 +120,26 @@ if( BUILD_THIRDPARTY)
   set(OPJ_HAVE_LIBLCMS2 1 PARENT_SCOPE)
 else(BUILD_THIRDPARTY)
   find_package(LCMS2)
+  # Static only build:
+  #   it is necessary to invoke pkg_check_module on lcms2 since it may have
+  #   several other dependencies not declared by its cmake module, but they are
+  #   in the its pkgconfig module.
+  if (PKG_CONFIG_FOUND)
+    pkg_check_modules(PC_LCMS2 QUIET lcms2)
+  endif (PKG_CONFIG_FOUND)
   if(LCMS2_FOUND)
     message(STATUS "Your system seems to have a LCMS2 lib available, we will use it")
     set(OPJ_HAVE_LCMS2_H 1 PARENT_SCOPE)
     set(OPJ_HAVE_LIBLCMS2 1 PARENT_SCOPE)
-    set(LCMS_LIBNAME ${LCMS2_LIBRARIES} PARENT_SCOPE)
-    set(LCMS_INCLUDE_DIRNAME ${LCMS2_INCLUDE_DIRS} PARENT_SCOPE)
+    if (BUILD_STATIC_LIBS AND NOT BUILD_SHARED_LIBS)
+      # Probably incorrect as PC_LCMS2_STATIC_LIBRARIES will lack the path to the libraries
+      # and will only work if they are in system directories
+      set(LCMS_LIBNAME ${PC_LCMS2_STATIC_LIBRARIES} PARENT_SCOPE)
+      set(LCMS_INCLUDE_DIRNAME ${PC_LCMS2_STATIC_INCLUDE_DIRS} PARENT_SCOPE)
+    else ()
+      set(LCMS_LIBNAME ${LCMS2_LIBRARIES} PARENT_SCOPE)
+      set(LCMS_INCLUDE_DIRNAME ${LCMS2_INCLUDE_DIRS} PARENT_SCOPE)
+    endif ()
   else(LCMS2_FOUND) # not found lcms2
     # try to find LCMS
     find_package(LCMS)
@@ -120,5 +160,6 @@ endif(BUILD_THIRDPARTY)
 
 #------------
 IF (WITH_ASTYLE)
+  enable_language(CXX)
   ADD_SUBDIRECTORY(astyle)
 ENDIF(WITH_ASTYLE)

@@ -14,10 +14,10 @@ android {
     signingConfigs {
         release {
             //TODO update the path to your keystore and the related variables
-            storeFile file(defaultKeyStoreFile)
-            storePassword defaultKeyStorePassword
-            keyAlias defaultKeyAlias
-            keyPassword defaultKeyPassword
+            storeFile file("c:\\Jenkins\\mbi_signing.keystore")
+            storePassword "Thales2020"
+            keyAlias "MBI"
+            keyPassword "Thales2020"
         }
 
         buildTypes {
