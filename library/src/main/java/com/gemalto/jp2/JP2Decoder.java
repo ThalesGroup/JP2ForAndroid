@@ -3,6 +3,7 @@ package com.gemalto.jp2;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.os.Build;
 import android.util.Log;
 
@@ -42,6 +43,7 @@ public class JP2Decoder {
     private int skipResolutions = 0;
     private int layersToDecode = 0;
     private boolean premultiplication = true;
+    private Rect sourceRegion = null;
 
     /**
      * Decode a JPEG-2000 image from a byte array.
@@ -102,6 +104,19 @@ public class JP2Decoder {
     }
 
     /**
+     * Sets the region of the source image that should be decoded. The region will be clipped to the
+     * dimensions of the source image. Setting this value to null will result in the entire image
+     * being decoded.
+     *
+     * @param sourceRegion The source region to decode, or null if the entire image should be
+     * decoded.
+     */
+    public void setSourceRegion(Rect sourceRegion)
+    {
+        this.sourceRegion = sourceRegion;
+    }
+
+    /**
      * This allows you to turn off alpha pre-multiplication in the output bitmap. Normally Android bitmaps with alpha
      * channel have their RGB component pre-multiplied by the normalized alpha channel. This improves performance when
      * displaying the bitmap, but it leads to loss of precision. This is no problem when you only want to display
@@ -143,8 +158,15 @@ public class JP2Decoder {
      */
     public Bitmap decode() {
         int res[] = null;
+        int regionLeft = 0, regionRight = 0, regionTop = 0, regionBottom = 0;
+        if(sourceRegion != null){
+            regionLeft = sourceRegion.left;
+            regionRight = sourceRegion.right;
+            regionTop = sourceRegion.top;
+            regionBottom = sourceRegion.bottom;
+        }
         if (fileName != null) {
-            res = decodeJP2File(fileName, skipResolutions, layersToDecode);
+            res = decodeJP2File(fileName, skipResolutions, layersToDecode, regionLeft, regionTop, regionRight, regionBottom);
         } else {
             if (data == null && is != null) {
                 data = readInputStream(is);
@@ -152,7 +174,7 @@ public class JP2Decoder {
             if (data == null) {
                 Log.e(TAG, "Data is null, nothing to decode");
             } else {
-                res = decodeJP2ByteArray(data, skipResolutions, layersToDecode);
+                res = decodeJP2ByteArray(data, skipResolutions, layersToDecode, regionLeft, regionTop, regionRight, regionBottom);
             }
         }
         return nativeToBitmap(res);
@@ -245,8 +267,8 @@ public class JP2Decoder {
         return true;
     }
 
-    private static native int[] decodeJP2File(String filename, int reduce, int layers);
-    private static native int[] decodeJP2ByteArray(byte[] data, int reduce, int layers);
+    private static native int[] decodeJP2File(String filename, int reduce, int layers, int left, int top, int right, int bottom);
+    private static native int[] decodeJP2ByteArray(byte[] data, int reduce, int layers, int left, int top, int right, int bottom);
     private static native int[] readJP2HeaderFile(String filename);
     private static native int[] readJP2HeaderByteArray(byte[] data);
 }
