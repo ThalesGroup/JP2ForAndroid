@@ -13,7 +13,7 @@ add_executable(opj_jpip_addxml opj_jpip_addxml.c)
 # Install exe
 install(TARGETS opj_jpip_addxml
   EXPORT OpenJPEGTargets
-  DESTINATION ${OPENJPEG_INSTALL_BIN_DIR} COMPONENT Applications
+        DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Applications
   )
 
 if(BUILD_JPIP_SERVER)
@@ -38,7 +38,7 @@ if(BUILD_JPIP_SERVER)
   # Install exe
   install(TARGETS opj_server
     EXPORT OpenJPEGTargets
-    DESTINATION ${OPENJPEG_INSTALL_BIN_DIR} COMPONENT Applications
+          DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Applications
     )
 endif()
 
@@ -52,19 +52,19 @@ add_executable(${exe} ${exe}.c)
   target_link_libraries(${exe} openjpip)
   install(TARGETS ${exe}
     EXPORT OpenJPEGTargets
-    DESTINATION ${OPENJPEG_INSTALL_BIN_DIR} COMPONENT Applications
+          DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Applications
     )
 endforeach()
 
 # Build the two java clients:
-find_package(Java 1.6 COMPONENTS Development) # javac, jar
+find_package(Java 1.8 COMPONENTS Development) # javac, jar
 
 # User can override this:
 if(NOT DEFINED JAVA_SOURCE_VERSION)
-  set(JAVA_SOURCE_VERSION 1.6)
+  set(JAVA_SOURCE_VERSION 1.8)
 endif()
 if(NOT DEFINED JAVA_TARGET_VERSION)
-  set(JAVA_TARGET_VERSION 1.6)
+  set(JAVA_TARGET_VERSION 1.8)
 endif()
 
 # Only build the java viewer if dev is found:
@@ -123,7 +123,7 @@ if(Java_Development_FOUND AND Java_JAVAC_EXECUTABLE)
       )
 
     install(FILES ${LIBRARY_OUTPUT_PATH}/opj_jpip_viewer.jar
-      DESTINATION ${OPENJPEG_INSTALL_SHARE_DIR} COMPONENT JavaModule
+            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR} COMPONENT JavaModule
       )
   else()
     # opj_viewer (simple, no xerces)
@@ -153,9 +153,9 @@ if(Java_Development_FOUND AND Java_JAVAC_EXECUTABLE)
       )
 
     install(FILES ${LIBRARY_OUTPUT_PATH}/opj_jpip_viewer.jar
-      DESTINATION ${OPENJPEG_INSTALL_SHARE_DIR} COMPONENT JavaModule
+            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR} COMPONENT JavaModule
       )
   endif()
 else()
-  message(WARNING "No java compiler found. Wont be able to build java viewer")
+  message(WARNING "No java compiler found. Won't be able to build java viewer")
 endif()

@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 30
-        versionName "1.0.3"
-        versionCode 4
+        versionName "1.0.4"
+        versionCode 5
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -25,6 +25,7 @@ android {
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
+            version "3.10.2.4988404"
         }
     }
     ndkVersion '22.0.7026061'

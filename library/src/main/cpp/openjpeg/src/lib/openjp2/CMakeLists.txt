@@ -2,7 +2,7 @@ include_regular_expression("^.*$")
 
 #
 install( FILES  ${CMAKE_CURRENT_BINARY_DIR}/opj_config.h
- DESTINATION ${OPENJPEG_INSTALL_INCLUDE_DIR} COMPONENT Headers)
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR} COMPONENT Headers)
 
 include_directories(
   ${${OPENJPEG_NAMESPACE}_BINARY_DIR}/src/lib/openjp2 # opj_config.h and opj_config_private.h
@@ -19,6 +19,7 @@ set(OPENJPEG_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/dwt.h
   ${CMAKE_CURRENT_SOURCE_DIR}/event.c
   ${CMAKE_CURRENT_SOURCE_DIR}/event.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ht_dec.c
   ${CMAKE_CURRENT_SOURCE_DIR}/image.c
   ${CMAKE_CURRENT_SOURCE_DIR}/image.h
   ${CMAKE_CURRENT_SOURCE_DIR}/invert.c
@@ -53,7 +54,6 @@ set(OPENJPEG_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/opj_intmath.h
   ${CMAKE_CURRENT_SOURCE_DIR}/opj_malloc.c
   ${CMAKE_CURRENT_SOURCE_DIR}/opj_malloc.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/opj_stdint.h
   ${CMAKE_CURRENT_SOURCE_DIR}/sparse_array.c
   ${CMAKE_CURRENT_SOURCE_DIR}/sparse_array.h
 )
@@ -97,44 +97,44 @@ else()
     add_library(openjp2_static STATIC ${OPENJPEG_SRCS})
     set_target_properties(openjp2_static PROPERTIES OUTPUT_NAME ${OPENJPEG_LIBRARY_NAME})
     set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME} openjp2_static)
+    target_include_directories(openjp2_static PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR}>)
   else()
     add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
     set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME})
   endif()
 endif()
 
+target_include_directories(${OPENJPEG_LIBRARY_NAME} PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR}>)
 if(UNIX)
   target_link_libraries(${OPENJPEG_LIBRARY_NAME} m)
 endif()
 set_target_properties(${OPENJPEG_LIBRARY_NAME} PROPERTIES ${OPENJPEG_LIBRARY_PROPERTIES})
-if(NOT ${CMAKE_VERSION} VERSION_LESS "2.8.12")
-  target_compile_options(${OPENJPEG_LIBRARY_NAME} PRIVATE ${OPENJP2_COMPILE_OPTIONS})
-endif()
+target_compile_options(${OPENJPEG_LIBRARY_NAME} PRIVATE ${OPENJP2_COMPILE_OPTIONS})
 
 # Install library
 install(TARGETS ${INSTALL_LIBS}
   EXPORT OpenJPEGTargets
-  RUNTIME DESTINATION ${OPENJPEG_INSTALL_BIN_DIR} COMPONENT Applications
-  LIBRARY DESTINATION ${OPENJPEG_INSTALL_LIB_DIR} COMPONENT Libraries
-  ARCHIVE DESTINATION ${OPENJPEG_INSTALL_LIB_DIR} COMPONENT Libraries
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Applications
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
 )
 
 # Install includes files
-install(FILES openjpeg.h opj_stdint.h
-  DESTINATION ${OPENJPEG_INSTALL_INCLUDE_DIR} COMPONENT Headers
+install(FILES openjpeg.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR} COMPONENT Headers
 )
 
 if(BUILD_DOC)
 # install man page of the library
 install(
   FILES       ${OPENJPEG_SOURCE_DIR}/doc/man/man3/libopenjp2.3
-  DESTINATION ${OPENJPEG_INSTALL_MAN_DIR}/man3)
+        DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
 endif()
 
 if(BUILD_LUTS_GENERATOR)
-# internal utility to generate t1_luts.h (part of the jp2 lib)
+    # internal utility to generate t1_luts.h and t1_ht_luts.h (part of the jp2 lib)
 # no need to install:
-  add_executable(t1_generate_luts t1_generate_luts.c)
+    add_executable(t1_generate_luts t1_generate_luts.c t1_ht_generate_luts.c)
   if(UNIX)
     target_link_libraries(t1_generate_luts m)
   endif()
