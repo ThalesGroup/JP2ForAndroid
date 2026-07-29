@@ -7,32 +7,25 @@ android {
     defaultConfig {
         applicationId "com.gemalto.openjpeg.test"
         minSdkVersion 14
-        targetSdkVersion 31
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
     }
 
     signingConfigs {
         release {
-            // Optional local signing config (only if properties are provided)
-            if (project.hasProperty('defaultKeyStoreFile') &&
-                    project.hasProperty('defaultKeyStorePassword') &&
-                    project.hasProperty('defaultKeyAlias') &&
-                    project.hasProperty('defaultKeyPassword')) {
-                storeFile file(defaultKeyStoreFile)
-                storePassword defaultKeyStorePassword
-                keyAlias defaultKeyAlias
-                keyPassword defaultKeyPassword
-            }
+            //TODO update the path to your keystore and the related variables
+            if (project.hasProperty('defaultKeyStoreFile')) storeFile file(defaultKeyStoreFile)
+            if (project.hasProperty('defaultKeyStorePassword')) storePassword defaultKeyStorePassword
+            if (project.hasProperty('defaultKeyAlias')) keyAlias defaultKeyAlias
+            if (project.hasProperty('defaultKeyPassword')) keyPassword defaultKeyPassword
         }
-    }
 
-    buildTypes {
-        release {
-            if (project.hasProperty('defaultKeyStoreFile')) {
+        buildTypes {
+            release {
                 signingConfig signingConfigs.release
+                minifyEnabled false
             }
-            minifyEnabled false
         }
     }
 
