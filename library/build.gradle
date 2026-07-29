@@ -1,14 +1,13 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
 
 android {
     compileSdkVersion 30
+    namespace 'com.gemalto.jp2'
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 30
-        versionName "1.0.3"
+        versionName "1.0.4"
         versionCode 4
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
@@ -33,7 +32,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.annotation:annotation:1.1.0'
-    //testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
@@ -89,4 +87,3 @@ ext {
     allLicenses = ["BSD-2-Clause"]
 }
 
-apply from: 'bintray.gradle'
