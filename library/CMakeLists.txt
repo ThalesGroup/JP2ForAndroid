@@ -68,13 +68,8 @@ find_library( # Sets the name of the path variable.
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
-target_link_libraries( # Specifies the target library.
-                       openjpeg
-
-                       # Links the target library to the log library
-                       # included in the NDK.
-                       ${log-lib} )
+target_link_libraries(openjpeg)
 
 # Use the following linker flags to support compiling 16 KB-aligned 
 # shared libraries with Android NDK version r27 or lower.
-target_link_options(openjpeg PRIVATE "-Wl,-z,max-page-size=16384,-z,common-page-size=16384")
+target_link_options(openjpeg PRIVATE ${log-lib} "-Wl,-z,max-page-size=16384,-z,common-page-size=16384")
