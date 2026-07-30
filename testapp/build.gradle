@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdk = 30
     namespace = "com.gemalto.jp2.test"
 
     defaultConfig {
         applicationId "com.gemalto.openjpeg.test"
-        minSdkVersion 14
-        targetSdkVersion 30
+        minSdk 16
+        targetSdk 30
         versionCode 1
         versionName "1.0"
     }
@@ -20,15 +20,14 @@ android {
             if (project.hasProperty('defaultKeyAlias')) keyAlias defaultKeyAlias
             if (project.hasProperty('defaultKeyPassword')) keyPassword defaultKeyPassword
         }
-
-        buildTypes {
-            release {
-                signingConfig signingConfigs.release
-                minifyEnabled false
-            }
-        }
     }
 
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
 }
 
 dependencies {

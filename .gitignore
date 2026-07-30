@@ -16,3 +16,4 @@ testapp/build
 testapp/.externalNativeBuild
 *.iml
 
+.artifacts/

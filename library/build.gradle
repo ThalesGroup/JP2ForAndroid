@@ -2,11 +2,11 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
 android {
-    compileSdkVersion 30
+    compileSdk = 30
     namespace 'com.gemalto.jp2'
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 30
+        minSdk 16
+        targetSdk 30
         versionName "1.0.4"
         versionCode 4
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -26,12 +26,15 @@ android {
             path "CMakeLists.txt"
         }
     }
+    buildFeatures {
+        buildConfig true
+    }
     ndkVersion '22.0.7026061'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.annotation:annotation:1.10.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
@@ -40,9 +43,9 @@ dependencies {
 /******************* PUBLISHING STUFF ************************/
 /*************************************************************/
 //create a sources jar
-task sourceJar(type: Jar) {
+tasks.register('sourceJar', Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier 'sources'
+    archiveClassifier.set("sources")
 }
 
 //publish to a local Maven repository with the sources jar and all dependencies
