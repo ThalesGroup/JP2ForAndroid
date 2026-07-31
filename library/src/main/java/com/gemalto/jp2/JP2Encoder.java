@@ -7,6 +7,8 @@ import androidx.annotation.IntDef;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,6 +37,7 @@ public class JP2Encoder {
     public static final int FORMAT_JP2 = 1;
 
     @IntDef({FORMAT_J2K, FORMAT_JP2})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface OutputFormat {}
 
     private int numResolutions = DEFAULT_NUM_RESOLUTIONS;
