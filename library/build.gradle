@@ -1,5 +1,7 @@
+plugins {
+    id "com.vanniktech.maven.publish" version "0.37.0" apply(true)
+}
 apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
 
 android {
     compileSdk = 30
@@ -42,51 +44,32 @@ dependencies {
 /*************************************************************/
 /******************* PUBLISHING STUFF ************************/
 /*************************************************************/
-//create a sources jar
-tasks.register('sourceJar', Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set("sources")
-}
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+    coordinates("io.github.michaldvorak-gemalto", "jp2-android", "${android.defaultConfig.versionName}")
 
-//publish to a local Maven repository with the sources jar and all dependencies
-publishing {
-    publications {
-        aarRelease(MavenPublication) {
-            groupId 'com.gemalto.jp2'
-            artifactId 'jp2-android'
-            version "${android.defaultConfig.versionName}"
-            artifact(sourceJar)
-            artifact("build/outputs/aar/library-release.aar")
+    pom {
+        name = "JP2ForAndroid"
+        description = "A JPEG-2000 image encoder/decoder for Android"
+        inceptionYear = "2019"
+        url = "https://github.com/ThalesGroup/JP2ForAndroid"
+        licenses {
+            license {
+                name = "The 2-Clause BSD License"
+                url = "https://opensource.org/licenses/BSD-2-Clause"
+                distribution = "repo"
+            }
+        }
+        developers {
+            developer {
+                name = "Michal Dvorak"
+                url = "https://github.com/michaldvorak-gemalto"
+            }
+        }
+        scm {
+            url = "https://github.com/ThalesGroup/JP2ForAndroid"
+            connection = "scm:git:https://github.com/ThalesGroup/JP2ForAndroid.git"
         }
     }
-    repositories {
-        maven {
-            url 'build/repo'
-        }
-    }
 }
-
-ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'JP2ForAndroid'
-
-    publishedGroupId = 'com.gemalto.jp2'
-    libraryName = 'JP2ForAndroid'
-    artifact = 'jp2-android'
-
-    libraryDescription = 'A JPEG-2000 image encoder/decoder for Android'
-
-    siteUrl = 'https://github.com/gemalto/JP2ForAndroid'
-    gitUrl = 'https://github.com/gemalto/JP2ForAndroid.git'
-
-    libraryVersion = "${android.defaultConfig.versionName}"
-
-    developerId = 'michal-dvorak-thales'
-    developerName = 'Michal Dvorak'
-    developerEmail = 'michal.dvorak@thalesgroup.com'
-
-    licenseName = 'The 2-Clause BSD License'
-    licenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
-    allLicenses = ["BSD-2-Clause"]
-}
-
