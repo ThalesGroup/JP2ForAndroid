@@ -1,12 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdk = 30
+    namespace = "com.gemalto.jp2.test"
 
     defaultConfig {
         applicationId "com.gemalto.openjpeg.test"
-        minSdkVersion 14
-        targetSdkVersion 30
+        minSdk 16
+        targetSdk 30
         versionCode 1
         versionName "1.0"
     }
@@ -14,20 +15,19 @@ android {
     signingConfigs {
         release {
             //TODO update the path to your keystore and the related variables
-            storeFile file(defaultKeyStoreFile)
-            storePassword defaultKeyStorePassword
-            keyAlias defaultKeyAlias
-            keyPassword defaultKeyPassword
-        }
-
-        buildTypes {
-            release {
-                signingConfig signingConfigs.release
-                minifyEnabled false
-            }
+            if (project.hasProperty('defaultKeyStoreFile')) storeFile file(defaultKeyStoreFile)
+            if (project.hasProperty('defaultKeyStorePassword')) storePassword defaultKeyStorePassword
+            if (project.hasProperty('defaultKeyAlias')) keyAlias defaultKeyAlias
+            if (project.hasProperty('defaultKeyPassword')) keyPassword defaultKeyPassword
         }
     }
 
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
 }
 
 dependencies {
