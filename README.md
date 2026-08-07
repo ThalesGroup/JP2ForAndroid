@@ -119,3 +119,5 @@ byte[] j2kdata = new JP2Encoder(bmp)
                      .setOutputFormat(FORMAT_J2K)
                      .encode();
 ```
+
+[High-Throughput JPEG-2000](https://jpeg.org/jpeg2000/htj2k.html) (or HTJ2K) is supported for decoding only.
