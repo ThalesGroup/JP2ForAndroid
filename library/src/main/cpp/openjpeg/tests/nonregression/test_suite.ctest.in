@@ -6,7 +6,7 @@
 #   + For encoder related tests = dump, compare dump to base, decode the encoded file with 
 #     reference and compare the decoded file with the baseline decoded previously with 
 #     ref decoder.
-#   + For decoder related tests = dump, compare dump to base, (TODO: compare outpout decoding 
+#   + For decoder related tests = dump, compare dump to base, (TODO: compare output decoding
 #     image to base)
 #
 # Line begin with ! should failed (should be used for bad jpeg2000 file which should be 
@@ -661,3 +661,14 @@ opj_decompress -i @INPUT_NR_PATH@/htj2k/byte_causal.jhc -o @TEMP_PATH@/byte_caus
 # huge tile size
 opj_decompress -i @INPUT_NR_PATH@/huge-tile-size.jp2 -o @TEMP_PATH@/huge-tile-size.png
 !opj_decompress -i @INPUT_NR_PATH@/issue1438.j2k -o @TEMP_PATH@/issue1438.png
+
+# decompress a single tile, where tile-parts are not consecutive, and with a TLM index
+opj_decompress -t 0 -i @INPUT_NR_PATH@/small_world_non_consecutive_tilepart_tlm.jp2 -o @TEMP_PATH@/small_world_non_consecutive_tilepart_tlm-t0.png
+opj_decompress -t 1 -i @INPUT_NR_PATH@/small_world_non_consecutive_tilepart_tlm.jp2 -o @TEMP_PATH@/small_world_non_consecutive_tilepart_tlm-t1.png
+
+# decompress a subset of tiles, where tile-parts are not consecutive, and with a TLM index
+opj_decompress -i @INPUT_NR_PATH@/small_world_non_consecutive_tilepart_tlm.jp2 -o @TEMP_PATH@/small_world_non_consecutive_tilepart_tlm-t0-d.png -d 0,0,256,200
+opj_decompress -i @INPUT_NR_PATH@/small_world_non_consecutive_tilepart_tlm.jp2 -o @TEMP_PATH@/small_world_non_consecutive_tilepart_tlm-t1-d.png -d 256,0,400,200
+
+# missing EPH Marker
+!opj_decompress -i @INPUT_NR_PATH@/issue1472-bigloop.j2k -o @TEMP_PATH@/issue1472-bigloop.raw

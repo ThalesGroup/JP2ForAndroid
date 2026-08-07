@@ -1,11 +1,11 @@
 # JP2 for Android
 ---------------------------
-An open-source JPEG-2000 image encoder/decoder for Android based on [OpenJPEG](http://www.openjpeg.org/) v2.5.2.
+An open-source JPEG-2000 image encoder/decoder for Android based on [OpenJPEG](http://www.openjpeg.org/) v2.5.4.
 
 ## Set up
 Add dependency to your `build.gradle`:
 ```groovy
-implementation 'io.github.michaldvorak-gemalto:jp2-android:1.0.4'
+implementation 'io.github.michaldvorak-gemalto:jp2-android:1.0.5'
 ```
 
 ## Basic Usage

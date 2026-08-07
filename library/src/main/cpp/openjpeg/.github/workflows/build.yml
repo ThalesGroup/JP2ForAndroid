@@ -1,14 +1,14 @@
 name: Build
 
-on: [ push, pull_request, workflow_dispatch ]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   regular:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Requirements
         run: |
@@ -17,28 +17,28 @@ jobs:
 
       - name: Build and run tests
         run: |
-          ./tools/travis-ci/install.sh
-          ./tools/travis-ci/run.sh
+            ./tools/travis-ci/install.sh
+            ./tools/travis-ci/run.sh
         env:
-          OPJ_CI_ARCH: x86_64
-          OPJ_CI_BUILD_CONFIGURATION: Release
-          OPJ_CI_PERF_TESTS: 1
-          OPJ_CI_BUILD_FUZZERS: 1
-          OPJ_CI_INCLUDE_IF_DEPLOY: 1
-          OPJ_NONCOMMERCIAL: 1
+            OPJ_CI_ARCH: x86_64
+            OPJ_CI_BUILD_CONFIGURATION: Release
+            OPJ_CI_PERF_TESTS: 1
+            OPJ_CI_BUILD_FUZZERS: 1
+            OPJ_CI_INCLUDE_IF_DEPLOY: 1
+            OPJ_NONCOMMERCIAL: 1
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: build/openjpeg-*.tar.gz
 
   asan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Requirements
         run: |
@@ -47,20 +47,20 @@ jobs:
 
       - name: Build and run tests
         run: |
-          ./tools/travis-ci/install.sh
-          ./tools/travis-ci/run.sh
+            ./tools/travis-ci/install.sh
+            ./tools/travis-ci/run.sh
         env:
-          OPJ_CI_ARCH: x86_64
-          OPJ_CI_BUILD_CONFIGURATION: Debug
-          OPJ_CI_ASAN: 1
-          OPJ_NONCOMMERCIAL: 1
+            OPJ_CI_ARCH: x86_64
+            OPJ_CI_BUILD_CONFIGURATION: Debug
+            OPJ_CI_ASAN: 1
+            OPJ_NONCOMMERCIAL: 1
 
   clang_32bit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Requirements
         run: |
@@ -69,23 +69,23 @@ jobs:
 
       - name: Build and run tests
         run: |
-          ./tools/travis-ci/install.sh
-          ./tools/travis-ci/run.sh
+            ./tools/travis-ci/install.sh
+            ./tools/travis-ci/run.sh
         env:
-          OPJ_CI_CC: clang
-          OPJ_CI_CXX: clang++
-          OPJ_CI_INSTRUCTION_SETS: "-mavx2"
-          OPJ_CI_BUILD_CONFIGURATION: Release
-          OPJ_CI_ARCH: i386
-          OPJ_NUM_THREADS: 2
-          OPJ_NONCOMMERCIAL: 1
+            OPJ_CI_CC: clang
+            OPJ_CI_CXX: clang++
+            OPJ_CI_INSTRUCTION_SETS: "-mavx2"
+            OPJ_CI_BUILD_CONFIGURATION: Release
+            OPJ_CI_ARCH: i386
+            OPJ_NUM_THREADS: 2
+            OPJ_NONCOMMERCIAL: 1
 
   mingw_64:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Requirements
         run: |
@@ -94,63 +94,88 @@ jobs:
 
       - name: Build and run tests
         run: |
-          ./tools/travis-ci/install.sh
-          ./tools/travis-ci/run.sh
+            ./tools/travis-ci/install.sh
+            ./tools/travis-ci/run.sh
         env:
-          OPJ_CI_CC: x86_64-w64-mingw32-gcc
-          OPJ_CI_CXX: x86_64-w64-mingw32-g++
-          OPJ_CI_ARCH: x86_64
-          OPJ_CI_BUILD_CONFIGURATION: Release
-          OPJ_NONCOMMERCIAL: 1
+            OPJ_CI_CC: x86_64-w64-mingw32-gcc
+            OPJ_CI_CXX: x86_64-w64-mingw32-g++
+            OPJ_CI_ARCH: x86_64
+            OPJ_CI_BUILD_CONFIGURATION: Release
+            OPJ_NONCOMMERCIAL: 1
 
-  macos:
-    runs-on: macos-latest
+  macos_x86_64:
+    runs-on: macos-13
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Build and run tests
         run: |
-          ./tools/travis-ci/install.sh
-          ./tools/travis-ci/run.sh
+            ./tools/travis-ci/install.sh
+            ./tools/travis-ci/run.sh
         env:
-          OPJ_CI_ARCH: x86_64
-          OPJ_CI_BUILD_CONFIGURATION: Release
-          OPJ_CI_INCLUDE_IF_DEPLOY: 1
-          #OPJ_NONCOMMERCIAL: 1
+            CMAKE_OSX_ARCHITECTURES: x86_64
+            OPJ_CI_ARCH: x86_64
+            OPJ_CI_BUILD_CONFIGURATION: Release
+            OPJ_CI_INCLUDE_IF_DEPLOY: 1
+            #OPJ_NONCOMMERCIAL: 1
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: build/openjpeg-*.zip
+
+  macos_arm64:
+    runs-on: macos-14
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and run tests
+        run: |
+            ./tools/travis-ci/install.sh
+            ./tools/travis-ci/run.sh
+        env:
+            CMAKE_OSX_ARCHITECTURES: arm64
+            OPJ_CI_ARCH: arm64
+            OPJ_CI_BUILD_CONFIGURATION: Release
+            OPJ_CI_INCLUDE_IF_DEPLOY: 1
+            #OPJ_NONCOMMERCIAL: 1
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: build/openjpeg-*.zip
 
   windows_build:
-    runs-on: windows-2019
+    runs-on: windows-2022
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
     strategy:
       matrix:
         include:
-          - VS_VER: 2019
+          - VS_VER: 2022
             OPJ_CI_ARCH: x64
             OPJ_CI_INCLUDE_IF_DEPLOY: 1
-          - VS_VER: 2019
+          - VS_VER: 2022
             OPJ_CI_ARCH: x86
             OPJ_CI_INCLUDE_IF_DEPLOY: 1
-          - VS_VER: 2019
+          - VS_VER: 2022
             OPJ_CI_ARCH: x64
             # We do have specific failures noted in tools/travis-ci/knownfailures-windows-vs2015-x64-avx2-Release-3rdP.txt
             # not sure why that happens
             OPJ_CI_INSTRUCTION_SETS: "/arch:AVX2"
 
     env:
-      VS_VER: ${{ matrix.VS_VER }}
-      OPJ_CI_ARCH: ${{ matrix.OPJ_CI_ARCH }}
-      OPJ_CI_INCLUDE_IF_DEPLOY: ${{ matrix.OPJ_CI_INCLUDE_IF_DEPLOY }}
-      OPJ_CI_INSTRUCTION_SETS: ${{ matrix.OPJ_CI_INSTRUCTION_SETS }}
-      #OPJ_NONCOMMERCIAL: 1
+        VS_VER: ${{ matrix.VS_VER }}
+        OPJ_CI_ARCH: ${{ matrix.OPJ_CI_ARCH }}
+        OPJ_CI_INCLUDE_IF_DEPLOY: ${{ matrix.OPJ_CI_INCLUDE_IF_DEPLOY }}
+        OPJ_CI_INSTRUCTION_SETS: ${{ matrix.OPJ_CI_INSTRUCTION_SETS }}
+        #OPJ_NONCOMMERCIAL: 1
 
     steps:
 
@@ -160,30 +185,30 @@ jobs:
           git config --system core.longpaths true
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set compiler environment
         shell: cmd
         run: |
-          if "%VS_VER%" == "2019" CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=%OPJ_CI_ARCH%
-          echo PATH=%PATH%>> %GITHUB_ENV%
-          echo INCLUDE=%INCLUDE%>> %GITHUB_ENV%
-          echo LIB=%LIB%>> %GITHUB_ENV%
-          echo LIBPATH=%LIBPATH%>> %GITHUB_ENV%
+            if "%VS_VER%" == "2022" CALL "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=%OPJ_CI_ARCH%
+            echo PATH=%PATH%>> %GITHUB_ENV%
+            echo INCLUDE=%INCLUDE%>> %GITHUB_ENV%
+            echo LIB=%LIB%>> %GITHUB_ENV%
+            echo LIBPATH=%LIBPATH%>> %GITHUB_ENV%
 
       - name: Install wget
         shell: cmd
         run: |
-          choco install wget --no-progress 
+            choco install wget --no-progress
 
       - name: Build and run tests
         run: |
-          ./tools/travis-ci/install.sh
-          ./tools/travis-ci/run.sh
+            ./tools/travis-ci/install.sh
+            ./tools/travis-ci/run.sh
         shell: bash
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: ${{startsWith(github.ref, 'refs/tags/') && env.OPJ_CI_INCLUDE_IF_DEPLOY == 1}}
         with:
           files: build/openjpeg-*.zip

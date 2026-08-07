@@ -139,9 +139,7 @@
 
 /* include proper interface headers */
 #if defined(HAVE_DIRENT_H)
-
 # include <dirent.h>
-
 # ifdef FREEBSD
 #   define NAMLEN(dp) ((int)((dp)->d_namlen))
 # else

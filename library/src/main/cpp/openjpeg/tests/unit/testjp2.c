@@ -28,11 +28,12 @@
 
 #include "openjpeg.h"
 
-static void test_colorspace(const char *pszDirectory) {
+static void test_colorspace(const char* pszDirectory)
+{
     char szFile[2048];
-    opj_image_t *image = NULL;
+    opj_image_t* image = NULL;
     opj_stream_t *l_stream = NULL;              /* Stream */
-    opj_codec_t *l_codec = NULL;                /* Handle to a decompressor */
+    opj_codec_t* l_codec = NULL;                /* Handle to a decompressor */
     opj_dparameters_t parameters;               /* decompression parameters */
 
     snprintf(szFile, sizeof(szFile), "%s/input/conformance/file1.jp2",
@@ -55,7 +56,7 @@ static void test_colorspace(const char *pszDirectory) {
     }
 
     /* Read the main header of the codestream and if necessary the JP2 boxes*/
-    if (!opj_read_header(l_stream, l_codec, &image)) {
+    if (! opj_read_header(l_stream, l_codec, &image)) {
         fprintf(stderr, "ERROR -> opj_decompress: failed to read the header\n");
         opj_stream_destroy(l_stream);
         opj_destroy_codec(l_codec);
@@ -78,11 +79,12 @@ static void test_colorspace(const char *pszDirectory) {
     opj_image_destroy(image);
 }
 
-static void test_iccprofile(const char *pszDirectory) {
+static void test_iccprofile(const char* pszDirectory)
+{
     char szFile[2048];
-    opj_image_t *image = NULL;
+    opj_image_t* image = NULL;
     opj_stream_t *l_stream = NULL;              /* Stream */
-    opj_codec_t *l_codec = NULL;                /* Handle to a decompressor */
+    opj_codec_t* l_codec = NULL;                /* Handle to a decompressor */
     opj_dparameters_t parameters;               /* decompression parameters */
 
     snprintf(szFile, sizeof(szFile), "%s/input/nonregression/relax.jp2",
@@ -105,7 +107,7 @@ static void test_iccprofile(const char *pszDirectory) {
     }
 
     /* Read the main header of the codestream and if necessary the JP2 boxes*/
-    if (!opj_read_header(l_stream, l_codec, &image)) {
+    if (! opj_read_header(l_stream, l_codec, &image)) {
         fprintf(stderr, "ERROR -> opj_decompress: failed to read the header\n");
         opj_stream_destroy(l_stream);
         opj_destroy_codec(l_codec);
@@ -128,7 +130,8 @@ static void test_iccprofile(const char *pszDirectory) {
     opj_image_destroy(image);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[])
+{
     if (argc != 2) {
         fprintf(stderr, "usage: testjp2 /path/to/opj_data_root\n");
         exit(1);

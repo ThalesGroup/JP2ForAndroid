@@ -578,7 +578,7 @@ int imagetotif(opj_image_t * image, const char *outfile)
     convert_32s_PXCX cvtPxToCx = NULL;
     convert_32sXXx_C1R cvt32sToTif = NULL;
 
-    bps = (uint16_t) image->comps[0].prec;
+    bps = (uint16_t)image->comps[0].prec;
     planes[0] = image->comps[0].data;
 
     numcomps = image->numcomps;
@@ -694,12 +694,12 @@ int imagetotif(opj_image_t * image, const char *outfile)
     }
     sgnd = (int)image->comps[0].sgnd;
     adjust = sgnd ? (int)(1 << (image->comps[0].prec - 1)) : 0;
-    width = (uint32_t) image->comps[0].w;
-    height = (uint32_t) image->comps[0].h;
+    width   = (uint32_t)image->comps[0].w;
+    height  = (uint32_t)image->comps[0].h;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, height);
-    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, (uint16_t) numcomps);
+    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, (uint16_t)numcomps);
     TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bps);
     TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
     TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
@@ -1247,7 +1247,7 @@ static void tif_16uto32s(const OPJ_UINT16* pSrc, OPJ_INT32* pDst,
  * libtiff/tif_getimage.c : 1,2,4,8,16 bitspersample accepted
  * CINEMA                 : 12 bit precision
  */
-opj_image_t *tiftoimage(const char *filename, opj_cparameters_t *parameters,
+opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters,
                         const unsigned int target_bitdepth)
 {
     int subsampling_dx = parameters->subsampling_dx;

@@ -37,27 +37,28 @@ void error_callback(const char *msg, void *v);
 void warning_callback(const char *msg, void *v);
 void info_callback(const char *msg, void *v);
 
-void error_callback(const char *msg, void *v) {
-    (void) msg;
-    (void) v;
+void error_callback(const char *msg, void *v)
+{
+    (void)msg;
+    (void)v;
     puts(msg);
 }
-
-void warning_callback(const char *msg, void *v) {
-    (void) msg;
-    (void) v;
+void warning_callback(const char *msg, void *v)
+{
+    (void)msg;
+    (void)v;
     puts(msg);
 }
-
-void info_callback(const char *msg, void *v) {
-    (void) msg;
-    (void) v;
+void info_callback(const char *msg, void *v)
+{
+    (void)msg;
+    (void)v;
     puts(msg);
 }
 
 int main(int argc, char *argv[])
 {
-    const char *v = opj_version();
+    const char * v = opj_version();
 
     const OPJ_COLOR_SPACE color_space = OPJ_CLRSPC_GRAY;
     unsigned int numcomps = 1;
@@ -73,17 +74,17 @@ int main(int argc, char *argv[])
 
     opj_image_cmptparm_t cmptparm;
     opj_image_t *image;
-    opj_codec_t *l_codec = 00;
+    opj_codec_t* l_codec = 00;
     OPJ_BOOL bSuccess;
     opj_stream_t *l_stream = 00;
-    (void) argc;
-    (void) argv;
+    (void)argc;
+    (void)argv;
 
     opj_set_default_encoder_parameters(&parameters);
     parameters.cod_format = J2K_CFMT;
     puts(v);
-    subsampling_dx = (unsigned int) parameters.subsampling_dx;
-    subsampling_dy = (unsigned int) parameters.subsampling_dy;
+    subsampling_dx = (unsigned int)parameters.subsampling_dx;
+    subsampling_dy = (unsigned int)parameters.subsampling_dy;
     cmptparm.prec = 8;
     cmptparm.sgnd = 0;
     cmptparm.dx = subsampling_dx;
@@ -145,7 +146,7 @@ int main(int argc, char *argv[])
 
     /* read back the generated file */
     {
-        opj_codec_t *d_codec = 00;
+        opj_codec_t* d_codec = 00;
         opj_dparameters_t dparameters;
 
         d_codec = opj_create_decompress(OPJ_CODEC_J2K);

@@ -2,7 +2,7 @@ include_regular_expression("^.*$")
 
 #
 install( FILES  ${CMAKE_CURRENT_BINARY_DIR}/opj_config.h
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR} COMPONENT Headers)
+ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR} COMPONENT Headers)
 
 include_directories(
   ${${OPENJPEG_NAMESPACE}_BINARY_DIR}/src/lib/openjp2 # opj_config.h and opj_config_private.h
@@ -19,7 +19,7 @@ set(OPENJPEG_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/dwt.h
   ${CMAKE_CURRENT_SOURCE_DIR}/event.c
   ${CMAKE_CURRENT_SOURCE_DIR}/event.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/ht_dec.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/ht_dec.c
   ${CMAKE_CURRENT_SOURCE_DIR}/image.c
   ${CMAKE_CURRENT_SOURCE_DIR}/image.h
   ${CMAKE_CURRENT_SOURCE_DIR}/invert.c
@@ -82,26 +82,20 @@ if(NOT WIN32 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER MATCHES ".*mingw32
 endif()
 
 # Build the library
+add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
+set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME})
 if(WIN32)
   if(BUILD_SHARED_LIBS)
-    add_definitions(-DOPJ_EXPORTS)
+    target_compile_definitions(${OPENJPEG_LIBRARY_NAME} PRIVATE OPJ_EXPORTS)
   else()
-    add_definitions(-DOPJ_STATIC)
+    target_compile_definitions(${OPENJPEG_LIBRARY_NAME} PUBLIC OPJ_STATIC)
   endif()
-  add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
-  set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME})
-else()
-  if(BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
-    # Builds both static and dynamic libs
-    add_library(${OPENJPEG_LIBRARY_NAME} SHARED ${OPENJPEG_SRCS})
-    add_library(openjp2_static STATIC ${OPENJPEG_SRCS})
-    set_target_properties(openjp2_static PROPERTIES OUTPUT_NAME ${OPENJPEG_LIBRARY_NAME})
-    set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME} openjp2_static)
-    target_include_directories(openjp2_static PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR}>)
-  else()
-    add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})
-    set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME})
-  endif()
+elseif(BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
+  # Builds both static and dynamic libs
+  add_library(openjp2_static STATIC ${OPENJPEG_SRCS})
+  set_target_properties(openjp2_static PROPERTIES OUTPUT_NAME ${OPENJPEG_LIBRARY_NAME})
+  list(APPEND INSTALL_LIBS openjp2_static)
+  target_include_directories(openjp2_static PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR}>)
 endif()
 
 target_include_directories(${OPENJPEG_LIBRARY_NAME} PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR}>)
@@ -114,27 +108,27 @@ target_compile_options(${OPENJPEG_LIBRARY_NAME} PRIVATE ${OPENJP2_COMPILE_OPTION
 # Install library
 install(TARGETS ${INSTALL_LIBS}
   EXPORT OpenJPEGTargets
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Applications
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Applications
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
 )
 
 # Install includes files
 install(FILES openjpeg.h
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR} COMPONENT Headers
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${OPENJPEG_INSTALL_SUBDIR} COMPONENT Headers
 )
 
 if(BUILD_DOC)
 # install man page of the library
 install(
   FILES       ${OPENJPEG_SOURCE_DIR}/doc/man/man3/libopenjp2.3
-        DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+  DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
 endif()
 
 if(BUILD_LUTS_GENERATOR)
-    # internal utility to generate t1_luts.h and t1_ht_luts.h (part of the jp2 lib)
+# internal utility to generate t1_luts.h and t1_ht_luts.h (part of the jp2 lib)
 # no need to install:
-    add_executable(t1_generate_luts t1_generate_luts.c t1_ht_generate_luts.c)
+  add_executable(t1_generate_luts t1_generate_luts.c t1_ht_generate_luts.c)
   if(UNIX)
     target_link_libraries(t1_generate_luts m)
   endif()

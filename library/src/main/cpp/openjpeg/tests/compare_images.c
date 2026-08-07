@@ -142,7 +142,7 @@ static char* createMultiComponentsFilename(const char* inFilename,
         return outFilename;
     }
 
-    outFilename = (char *) malloc(posToken + 32);
+    outFilename = (char*)malloc(posToken + 32);
 
     memcpy(outFilename, inFilename, posToken);
     outFilename[posToken] = '\0';
@@ -850,10 +850,10 @@ int main(int argc, char **argv)
         unsigned right_shift_output = 0;
         if (((imageBase->comps)[it_comp]).prec > ((imageTest->comps)[it_comp]).prec) {
             right_shift_input = ((imageBase->comps)[it_comp]).prec - ((
-                    imageTest->comps)[it_comp]).prec;
+                                    imageTest->comps)[it_comp]).prec;
         } else {
             right_shift_output = ((imageTest->comps)[it_comp]).prec - ((
-                    imageBase->comps)[it_comp]).prec;
+                                     imageBase->comps)[it_comp]).prec;
         }
         for (itpxl = 0;
                 itpxl < ((imageDiff->comps)[it_comp]).w * ((imageDiff->comps)[it_comp]).h;
@@ -939,7 +939,7 @@ int main(int argc, char **argv)
 
                     if ( imageToPNG(imageDiff, filenamePNGdiff_it_comp, it_comp) == EXIT_SUCCESS )
                     {
-                    printf("<DartMeasurementFile name=\"DiffferenceImage_%d\" type=\"image/png\"> %s </DartMeasurementFile> \n", it_comp, filenamePNGdiff_it_comp);
+                    printf("<DartMeasurementFile name=\"DifferenceImage_%d\" type=\"image/png\"> %s </DartMeasurementFile> \n", it_comp, filenamePNGdiff_it_comp);
                     }
                      */
 

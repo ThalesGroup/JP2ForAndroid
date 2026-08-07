@@ -243,7 +243,7 @@ void opj_tcd_rateallocate_fixed(opj_tcd_t *tcd)
 /* ----------------------------------------------------------------------- */
 
 /** Returns OPJ_TRUE if the layer allocation is unchanged w.r.t to the previous
- * invokation with a different threshold */
+ * invocation with a different threshold */
 static
 OPJ_BOOL opj_tcd_makelayer(opj_tcd_t *tcd,
                            OPJ_UINT32 layno,
@@ -535,8 +535,8 @@ OPJ_BOOL opj_tcd_rateallocate(opj_tcd_t *tcd,
                         } /* passno */
 
                         {
-                            const OPJ_SIZE_T cblk_pix_count = (OPJ_SIZE_T) ((cblk->x1 - cblk->x0) *
-                                                                            (cblk->y1 - cblk->y0));
+                            const OPJ_SIZE_T cblk_pix_count = (OPJ_SIZE_T)((cblk->x1 - cblk->x0) *
+                                                              (cblk->y1 - cblk->y0));
                             tcd_tile->numpix += cblk_pix_count;
                             tilec->numpix += cblk_pix_count;
                         }
@@ -553,8 +553,8 @@ OPJ_BOOL opj_tcd_rateallocate(opj_tcd_t *tcd,
     /* index file */
     if (cstr_info) {
         opj_tile_info_t *tile_info = &cstr_info->tile[tcd->tcd_tileno];
-        tile_info->numpix = (int) tcd_tile->numpix;
-        tile_info->distotile = (int) tcd_tile->distotile;
+        tile_info->numpix = (int)tcd_tile->numpix;
+        tile_info->distotile = (int)tcd_tile->distotile;
         tile_info->thresh = (OPJ_FLOAT64 *) opj_malloc(tcd_tcp->numlayers * sizeof(
                                 OPJ_FLOAT64));
         if (!tile_info->thresh) {
@@ -581,10 +581,10 @@ OPJ_BOOL opj_tcd_rateallocate(opj_tcd_t *tcd,
           -q xx,yy,zz,0   (m_quality_layer_alloc_strategy == FIXED_DISTORTION_RATIO and distoratio == NULL)
           ==> possible to have some lossy layers and the last layer for sure lossless */
         if (((cp->m_specific_param.m_enc.m_quality_layer_alloc_strategy ==
-              RATE_DISTORTION_RATIO) &&
+                RATE_DISTORTION_RATIO) &&
                 (tcd_tcp->rates[layno] > 0.0f)) ||
-            ((cp->m_specific_param.m_enc.m_quality_layer_alloc_strategy ==
-              FIXED_DISTORTION_RATIO) &&
+                ((cp->m_specific_param.m_enc.m_quality_layer_alloc_strategy ==
+                  FIXED_DISTORTION_RATIO) &&
                  (tcd_tcp->distoratio[layno] > 0.0))) {
             opj_t2_t*t2 = opj_t2_create(tcd->image, cp);
             OPJ_FLOAT64 thresh = 0;
@@ -618,7 +618,7 @@ OPJ_BOOL opj_tcd_rateallocate(opj_tcd_t *tcd,
                               layer_allocation_is_same);
 #endif
                 if (cp->m_specific_param.m_enc.m_quality_layer_alloc_strategy ==
-                    FIXED_DISTORTION_RATIO) {
+                        FIXED_DISTORTION_RATIO) {
                     if (OPJ_IS_CINEMA(cp->rsiz) || OPJ_IS_IMF(cp->rsiz)) {
                         if (! opj_t2_encode_packets(t2, tcd->tcd_tileno, tcd_tile, layno + 1, dest,
                                                     p_data_written, maxlen, cstr_info, NULL, tcd->cur_tp_num, tcd->tp_pos,
@@ -659,12 +659,11 @@ OPJ_BOOL opj_tcd_rateallocate(opj_tcd_t *tcd,
                      * has resulted in different truncation points since its last
                      * call. */
                     if ((layer_allocation_is_same && !last_layer_allocation_ok) ||
-                        (!layer_allocation_is_same &&
-                         !opj_t2_encode_packets(t2, tcd->tcd_tileno, tcd_tile, layno + 1, dest,
-                                                p_data_written, maxlen, cstr_info, NULL,
-                                                tcd->cur_tp_num, tcd->tp_pos,
-                                                tcd->cur_pino,
-                                                THRESH_CALC, p_manager))) {
+                            (!layer_allocation_is_same &&
+                             ! opj_t2_encode_packets(t2, tcd->tcd_tileno, tcd_tile, layno + 1, dest,
+                                                     p_data_written, maxlen, cstr_info, NULL, tcd->cur_tp_num, tcd->tp_pos,
+                                                     tcd->cur_pino,
+                                                     THRESH_CALC, p_manager))) {
 
 #ifdef DEBUG_RATE_ALLOC
                         if (!layer_allocation_is_same) {
@@ -2334,7 +2333,7 @@ static OPJ_BOOL opj_tcd_dc_level_shift_decode(opj_tcd_t *p_tcd)
             for (j = 0; j < l_height; ++j) {
                 for (i = 0; i < l_width; ++i) {
                     OPJ_FLOAT32 l_value = *((OPJ_FLOAT32 *) l_current_ptr);
-                    if (l_value > (OPJ_FLOAT32) INT_MAX) {
+                    if (l_value > (OPJ_FLOAT32)INT_MAX) {
                         *l_current_ptr = l_max;
                     } else if (l_value < INT_MIN) {
                         *l_current_ptr = l_min;
@@ -2672,9 +2671,9 @@ static OPJ_BOOL opj_tcd_rate_allocate_encode(opj_tcd_t *p_tcd,
     }
 
     if (l_cp->m_specific_param.m_enc.m_quality_layer_alloc_strategy ==
-        RATE_DISTORTION_RATIO ||
-        l_cp->m_specific_param.m_enc.m_quality_layer_alloc_strategy ==
-        FIXED_DISTORTION_RATIO) {
+            RATE_DISTORTION_RATIO ||
+            l_cp->m_specific_param.m_enc.m_quality_layer_alloc_strategy ==
+            FIXED_DISTORTION_RATIO)  {
         if (! opj_tcd_rateallocate(p_tcd, p_dest_data, &l_nb_written, p_max_dest_size,
                                    p_cstr_info, p_manager)) {
             return OPJ_FALSE;
@@ -2862,12 +2861,12 @@ OPJ_BOOL opj_tcd_is_subband_area_of_interest(opj_tcd_t *tcd,
     return intersects;
 }
 
-/** Returns whether a tile componenent is fully decoded, taking into account
+/** Returns whether a tile component is fully decoded, taking into account
  * p_tcd->win_* members.
  *
  * @param p_tcd    TCD handle.
  * @param compno Component number
- * @return OPJ_TRUE whether the tile componenent is fully decoded
+ * @return OPJ_TRUE whether the tile component is fully decoded
  */
 static OPJ_BOOL opj_tcd_is_whole_tilecomp_decoding(opj_tcd_t *p_tcd,
         OPJ_UINT32 compno)

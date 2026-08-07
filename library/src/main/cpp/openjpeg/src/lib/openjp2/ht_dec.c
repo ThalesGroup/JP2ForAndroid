@@ -56,8 +56,8 @@
 #endif
 
 #if defined(OPJ_COMPILER_MSVC) && defined(_M_ARM64) \
- && !defined(_M_ARM64EC) && !defined(_M_CEE_PURE) && !defined(__CUDACC__) \
- && !defined(__INTEL_COMPILER) && !defined(__clang__)
+    && !defined(_M_ARM64EC) && !defined(_M_CEE_PURE) && !defined(__CUDACC__) \
+    && !defined(__INTEL_COMPILER) && !defined(__clang__)
 #define MSVC_NEON_INTRINSICS
 #endif
 
@@ -77,14 +77,15 @@ static OPJ_BOOL only_cleanup_pass_is_decoded = OPJ_FALSE;
   *   @param [in]  val is the value for which population count is sought
   */
 static INLINE
-OPJ_UINT32 population_count(OPJ_UINT32 val) {
+OPJ_UINT32 population_count(OPJ_UINT32 val)
+{
 #if defined(OPJ_COMPILER_MSVC) && (defined(_M_IX86) || defined(_M_AMD64))
     return (OPJ_UINT32)__popcnt(val);
 #elif defined(OPJ_COMPILER_MSVC) && defined(MSVC_NEON_INTRINSICS)
     const __n64 temp = neon_cnt(__uint64ToN64_v(val));
     return neon_addv8(temp).n8_i8[0];
 #elif (defined OPJ_COMPILER_GNUC)
-    return (OPJ_UINT32) __builtin_popcount(val);
+    return (OPJ_UINT32)__builtin_popcount(val);
 #else
     val -= ((val >> 1) & 0x55555555);
     val = (((val >> 2) & 0x33333333) + (val & 0x33333333));
@@ -103,15 +104,15 @@ OPJ_UINT32 population_count(OPJ_UINT32 val) {
 #ifdef OPJ_COMPILER_MSVC
 #pragma intrinsic(_BitScanReverse)
 #endif
-
 static INLINE
-OPJ_UINT32 count_leading_zeros(OPJ_UINT32 val) {
+OPJ_UINT32 count_leading_zeros(OPJ_UINT32 val)
+{
 #ifdef OPJ_COMPILER_MSVC
     unsigned long result = 0;
     _BitScanReverse(&result, val);
     return 31U ^ (OPJ_UINT32)result;
 #elif (defined OPJ_COMPILER_GNUC)
-    return (OPJ_UINT32) __builtin_clz(val);
+    return (OPJ_UINT32)__builtin_clz(val);
 #else
     val |= (val >> 1);
     val |= (val >> 2);
@@ -127,7 +128,8 @@ OPJ_UINT32 count_leading_zeros(OPJ_UINT32 val) {
   *
   *   @param [in]  dataIn pointer to byte stream to read from
   */
-static INLINE OPJ_UINT32 read_le_uint32(const void *dataIn) {
+static INLINE OPJ_UINT32 read_le_uint32(const void* dataIn)
+{
 #if defined(OPJ_BIG_ENDIAN)
     const OPJ_UINT8* data = (const OPJ_UINT8*)dataIn;
     return ((OPJ_UINT32)data[0]) | (OPJ_UINT32)(data[1] << 8) | (OPJ_UINT32)(
@@ -135,7 +137,7 @@ static INLINE OPJ_UINT32 read_le_uint32(const void *dataIn) {
                                       OPJ_UINT32)data[3]) <<
                                  24U);
 #else
-    return *(OPJ_UINT32 *) dataIn;
+    return *(OPJ_UINT32*)dataIn;
 #endif
 }
 
@@ -148,7 +150,7 @@ static INLINE OPJ_UINT32 read_le_uint32(const void *dataIn) {
   */
 typedef struct dec_mel {
     // data decoding machinery
-    OPJ_UINT8 *data;  //!<the address of data (or bitstream)
+    OPJ_UINT8* data;  //!<the address of data (or bitstream)
     OPJ_UINT64 tmp;   //!<temporary buffer for read data
     int bits;         //!<number of bits stored in tmp
     int size;         //!<number of bytes in MEL code
@@ -173,7 +175,8 @@ typedef struct dec_mel {
   *  @param [in]  melp is a pointer to dec_mel_t structure
   */
 static INLINE
-void mel_read(dec_mel_t *melp) {
+void mel_read(dec_mel_t *melp)
+{
     OPJ_UINT32 val;
     int bits;
     OPJ_UINT32 t;
@@ -234,7 +237,7 @@ void mel_read(dec_mel_t *melp) {
 
     // move t to tmp, and push the result all the way up, so we read from
     // the MSB
-    melp->tmp |= ((OPJ_UINT64) t) << (64 - bits - melp->bits);
+    melp->tmp |= ((OPJ_UINT64)t) << (64 - bits - melp->bits);
     melp->bits += bits; //increment the number of bits in tmp
 }
 
@@ -254,9 +257,10 @@ void mel_read(dec_mel_t *melp) {
   *  @param [in]  melp is a pointer to dec_mel_t structure
   */
 static INLINE
-void mel_decode(dec_mel_t *melp) {
+void mel_decode(dec_mel_t *melp)
+{
     static const int mel_exp[13] = { //MEL exponents
-            0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5
+        0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5
     };
 
     if (melp->bits < 6) { // if there are less than 6 bits in tmp
@@ -279,15 +283,15 @@ void mel_decode(dec_mel_t *melp) {
             run = run << 1; // a stretch of zeros not terminating in one
         } else {
             //0 is found
-            run = (int) (melp->tmp >> (63 - eval)) & ((1 << eval) - 1);
+            run = (int)(melp->tmp >> (63 - eval)) & ((1 << eval) - 1);
             melp->k = melp->k - 1 > 0 ? melp->k - 1 : 0; //decrement, min is 0
             melp->tmp <<= eval + 1; //consume eval + 1 bits (max is 6)
             melp->bits -= eval + 1;
             run = (run << 1) + 1; // a stretch of zeros terminating with one
         }
         eval = melp->num_runs * 7;                 // 7 bits per run
-        melp->runs &= ~((OPJ_UINT64) 0x3F << eval); // 6 bits are sufficient
-        melp->runs |= ((OPJ_UINT64) run) << eval;   // store the value in runs
+        melp->runs &= ~((OPJ_UINT64)0x3F << eval); // 6 bits are sufficient
+        melp->runs |= ((OPJ_UINT64)run) << eval;   // store the value in runs
         melp->num_runs++;                          // increment count
     }
 }
@@ -303,7 +307,8 @@ void mel_decode(dec_mel_t *melp) {
   *  @param [in]  scup is the length of MEL+VLC segments
   */
 static INLINE
-OPJ_BOOL mel_init(dec_mel_t *melp, OPJ_UINT8 *bbuf, int lcup, int scup) {
+OPJ_BOOL mel_init(dec_mel_t *melp, OPJ_UINT8* bbuf, int lcup, int scup)
+{
     int num;
     int i;
 
@@ -319,7 +324,7 @@ OPJ_BOOL mel_init(dec_mel_t *melp, OPJ_UINT8 *bbuf, int lcup, int scup) {
     //This code is borrowed; original is for a different architecture
     //These few lines take care of the case where data is not at a multiple
     // of 4 boundary.  It reads 1,2,3 up to 4 bytes from the MEL segment
-    num = 4 - (int) ((intptr_t) (melp->data) & 0x3);
+    num = 4 - (int)((intptr_t)(melp->data) & 0x3);
     for (i = 0; i < num; ++i) { // this code is similar to mel_read
         OPJ_UINT64 d;
         int d_bits;
@@ -352,7 +357,8 @@ OPJ_BOOL mel_init(dec_mel_t *melp, OPJ_UINT8 *bbuf, int lcup, int scup) {
   * @param [in]  melp is a pointer to dec_mel_t structure
   */
 static INLINE
-int mel_get_run(dec_mel_t *melp) {
+int mel_get_run(dec_mel_t *melp)
+{
     int t;
     if (melp->num_runs == 0) { //if no runs, decode more bit from MEL segment
         mel_decode(melp);
@@ -370,7 +376,7 @@ int mel_get_run(dec_mel_t *melp) {
   */
 typedef struct rev_struct {
     //storage
-    OPJ_UINT8 *data;  //!<pointer to where to read data
+    OPJ_UINT8* data;  //!<pointer to where to read data
     OPJ_UINT64 tmp;     //!<temporary buffer of read data
     OPJ_UINT32 bits;  //!<number of bits stored in tmp
     int size;         //!<number of bytes left
@@ -399,7 +405,8 @@ typedef struct rev_struct {
   *  @param [in]  vlcp is a pointer to rev_struct_t structure
   */
 static INLINE
-void rev_read(rev_struct_t *vlcp) {
+void rev_read(rev_struct_t *vlcp)
+{
     OPJ_UINT32 val;
     OPJ_UINT32 tmp;
     OPJ_UINT32 bits;
@@ -446,7 +453,7 @@ void rev_read(rev_struct_t *vlcp) {
     unstuff = (val & 0xFF) > 0x8F;
 
     // now move the read and unstuffed bits into vlcp->tmp
-    vlcp->tmp |= (OPJ_UINT64) tmp << vlcp->bits;
+    vlcp->tmp |= (OPJ_UINT64)tmp << vlcp->bits;
     vlcp->bits += bits;
     vlcp->unstuff = unstuff; // this for the next read
 }
@@ -466,7 +473,8 @@ void rev_read(rev_struct_t *vlcp) {
   *  @param [in]  scup is the length of MEL+VLC segments
   */
 static INLINE
-void rev_init(rev_struct_t *vlcp, OPJ_UINT8 *data, int lcup, int scup) {
+void rev_init(rev_struct_t *vlcp, OPJ_UINT8* data, int lcup, int scup)
+{
     OPJ_UINT32 d;
     int num, tnum, i;
 
@@ -486,7 +494,7 @@ void rev_init(rev_struct_t *vlcp, OPJ_UINT8 *data, int lcup, int scup) {
     //These few lines take care of the case where data is not at a multiple
     // of 4 boundary. It reads 1,2,3 up to 4 bytes from the VLC bitstream.
     // To read 32 bits, read from (vlcp->data - 3)
-    num = 1 + (int) ((intptr_t) (vlcp->data) & 0x3);
+    num = 1 + (int)((intptr_t)(vlcp->data) & 0x3);
     tnum = num < vlcp->size ? num : vlcp->size;
     for (i = 0; i < tnum; ++i) {
         OPJ_UINT64 d;
@@ -510,14 +518,15 @@ void rev_init(rev_struct_t *vlcp, OPJ_UINT8 *data, int lcup, int scup) {
   *  @param [in]  vlcp is a pointer to rev_struct structure
   */
 static INLINE
-OPJ_UINT32 rev_fetch(rev_struct_t *vlcp) {
+OPJ_UINT32 rev_fetch(rev_struct_t *vlcp)
+{
     if (vlcp->bits < 32) { // if there are less then 32 bits, read more
         rev_read(vlcp);     // read 32 bits, but unstuffing might reduce this
         if (vlcp->bits < 32) { // if there is still space in vlcp->tmp for 32 bits
             rev_read(vlcp);    // read another 32
         }
     }
-    return (OPJ_UINT32) vlcp->tmp; // return the head (bottom-most) of vlcp->tmp
+    return (OPJ_UINT32)vlcp->tmp; // return the head (bottom-most) of vlcp->tmp
 }
 
 //************************************************************************/
@@ -527,11 +536,12 @@ OPJ_UINT32 rev_fetch(rev_struct_t *vlcp) {
   *  @param [in]  num_bits is the number of bits to be removed
   */
 static INLINE
-OPJ_UINT32 rev_advance(rev_struct_t *vlcp, OPJ_UINT32 num_bits) {
+OPJ_UINT32 rev_advance(rev_struct_t *vlcp, OPJ_UINT32 num_bits)
+{
     assert(num_bits <= vlcp->bits); // vlcp->tmp must have more than num_bits
     vlcp->tmp >>= num_bits;         // remove bits
     vlcp->bits -= num_bits;         // decrement the number of bits
-    return (OPJ_UINT32) vlcp->tmp;
+    return (OPJ_UINT32)vlcp->tmp;
 }
 
 //************************************************************************/
@@ -546,7 +556,8 @@ OPJ_UINT32 rev_advance(rev_struct_t *vlcp, OPJ_UINT32 num_bits) {
   *  @param [in]  mrp is a pointer to rev_struct structure
   */
 static INLINE
-void rev_read_mrp(rev_struct_t *mrp) {
+void rev_read_mrp(rev_struct_t *mrp)
+{
     OPJ_UINT32 val;
     OPJ_UINT32 tmp;
     OPJ_UINT32 bits;
@@ -593,7 +604,7 @@ void rev_read_mrp(rev_struct_t *mrp) {
     bits += 8u - ((unstuff && ((val & 0x7F) == 0x7F)) ? 1u : 0u);
     unstuff = (val & 0xFF) > 0x8F;
 
-    mrp->tmp |= (OPJ_UINT64) tmp << mrp->bits; // move data to mrp pointer
+    mrp->tmp |= (OPJ_UINT64)tmp << mrp->bits; // move data to mrp pointer
     mrp->bits += bits;
     mrp->unstuff = unstuff;                   // next byte
 }
@@ -614,7 +625,8 @@ void rev_read_mrp(rev_struct_t *mrp) {
   *  @param [in]  len2 is the length of SPP+MRP segments
   */
 static INLINE
-void rev_init_mrp(rev_struct_t *mrp, OPJ_UINT8 *data, int lcup, int len2) {
+void rev_init_mrp(rev_struct_t *mrp, OPJ_UINT8* data, int lcup, int len2)
+{
     int num, i;
 
     mrp->data = data + lcup + len2 - 1;
@@ -627,7 +639,7 @@ void rev_init_mrp(rev_struct_t *mrp, OPJ_UINT8 *data, int lcup, int len2) {
     // align to the read size (address multiple of 4 if read size is 4)
     //These few lines take care of the case where data is not at a multiple
     // of 4 boundary.  It reads 1,2,3 up to 4 bytes from the MRP stream
-    num = 1 + (int) ((intptr_t) (mrp->data) & 0x3);
+    num = 1 + (int)((intptr_t)(mrp->data) & 0x3);
     for (i = 0; i < num; ++i) {
         OPJ_UINT64 d;
         OPJ_UINT32 d_bits;
@@ -651,14 +663,15 @@ void rev_init_mrp(rev_struct_t *mrp, OPJ_UINT8 *data, int lcup, int len2) {
   *  @param [in]  mrp is a pointer to rev_struct structure
   */
 static INLINE
-OPJ_UINT32 rev_fetch_mrp(rev_struct_t *mrp) {
+OPJ_UINT32 rev_fetch_mrp(rev_struct_t *mrp)
+{
     if (mrp->bits < 32) { // if there are less than 32 bits in mrp->tmp
         rev_read_mrp(mrp);    // read 30-32 bits from mrp
         if (mrp->bits < 32) { // if there is a space of 32 bits
             rev_read_mrp(mrp);    // read more
         }
     }
-    return (OPJ_UINT32) mrp->tmp;  // return the head of mrp->tmp
+    return (OPJ_UINT32)mrp->tmp;  // return the head of mrp->tmp
 }
 
 //************************************************************************/
@@ -668,11 +681,12 @@ OPJ_UINT32 rev_fetch_mrp(rev_struct_t *mrp) {
   *  @param [in]  num_bits is the number of bits to be removed
   */
 static INLINE
-OPJ_UINT32 rev_advance_mrp(rev_struct_t *mrp, OPJ_UINT32 num_bits) {
+OPJ_UINT32 rev_advance_mrp(rev_struct_t *mrp, OPJ_UINT32 num_bits)
+{
     assert(num_bits <= mrp->bits); // we must not consume more than mrp->bits
     mrp->tmp >>= num_bits;         // discard the lowest num_bits bits
     mrp->bits -= num_bits;
-    return (OPJ_UINT32) mrp->tmp;   // return data after consumption
+    return (OPJ_UINT32)mrp->tmp;   // return data after consumption
 }
 
 //************************************************************************/
@@ -687,7 +701,8 @@ OPJ_UINT32 rev_advance_mrp(rev_struct_t *mrp, OPJ_UINT32 num_bits) {
   *               this value is a partial calculation of u + kappa.
   */
 static INLINE
-OPJ_UINT32 decode_init_uvlc(OPJ_UINT32 vlc, OPJ_UINT32 mode, OPJ_UINT32 *u) {
+OPJ_UINT32 decode_init_uvlc(OPJ_UINT32 vlc, OPJ_UINT32 mode, OPJ_UINT32 *u)
+{
     //table stores possible decoding three bits from vlc
     // there are 8 entries for xx1, x10, 100, 000, where x means do not care
     // table value is made up of
@@ -695,14 +710,14 @@ OPJ_UINT32 decode_init_uvlc(OPJ_UINT32 vlc, OPJ_UINT32 mode, OPJ_UINT32 *u) {
     // 3 bits for suffix length
     // 3 bits in the MSB for prefix value (u_pfx in Table 3 of ITU T.814)
     static const OPJ_UINT8 dec[8] = { // the index is the prefix codeword
-            3 | (5 << 2) | (5 << 5),        //000 == 000, prefix codeword "000"
-            1 | (0 << 2) | (1 << 5),        //001 == xx1, prefix codeword "1"
-            2 | (0 << 2) | (2 << 5),        //010 == x10, prefix codeword "01"
-            1 | (0 << 2) | (1 << 5),        //011 == xx1, prefix codeword "1"
-            3 | (1 << 2) | (3 << 5),        //100 == 100, prefix codeword "001"
-            1 | (0 << 2) | (1 << 5),        //101 == xx1, prefix codeword "1"
-            2 | (0 << 2) | (2 << 5),        //110 == x10, prefix codeword "01"
-            1 | (0 << 2) | (1 << 5)         //111 == xx1, prefix codeword "1"
+        3 | (5 << 2) | (5 << 5),        //000 == 000, prefix codeword "000"
+        1 | (0 << 2) | (1 << 5),        //001 == xx1, prefix codeword "1"
+        2 | (0 << 2) | (2 << 5),        //010 == x10, prefix codeword "01"
+        1 | (0 << 2) | (1 << 5),        //011 == xx1, prefix codeword "1"
+        3 | (1 << 2) | (3 << 5),        //100 == 100, prefix codeword "001"
+        1 | (0 << 2) | (1 << 5),        //101 == xx1, prefix codeword "1"
+        2 | (0 << 2) | (2 << 5),        //110 == x10, prefix codeword "01"
+        1 | (0 << 2) | (1 << 5)         //111 == xx1, prefix codeword "1"
     };
 
     OPJ_UINT32 consumed_bits = 0;
@@ -799,7 +814,8 @@ OPJ_UINT32 decode_init_uvlc(OPJ_UINT32 vlc, OPJ_UINT32 mode, OPJ_UINT32 *u) {
   *               this value is a partial calculation of u + kappa.
   */
 static INLINE
-OPJ_UINT32 decode_noninit_uvlc(OPJ_UINT32 vlc, OPJ_UINT32 mode, OPJ_UINT32 *u) {
+OPJ_UINT32 decode_noninit_uvlc(OPJ_UINT32 vlc, OPJ_UINT32 mode, OPJ_UINT32 *u)
+{
     //table stores possible decoding three bits from vlc
     // there are 8 entries for xx1, x10, 100, 000, where x means do not care
     // table value is made up of
@@ -807,14 +823,14 @@ OPJ_UINT32 decode_noninit_uvlc(OPJ_UINT32 vlc, OPJ_UINT32 mode, OPJ_UINT32 *u) {
     // 3 bits for suffix length
     // 3 bits in the MSB for prefix value (u_pfx in Table 3 of ITU T.814)
     static const OPJ_UINT8 dec[8] = {
-            3 | (5 << 2) | (5 << 5), //000 == 000, prefix codeword "000"
-            1 | (0 << 2) | (1 << 5), //001 == xx1, prefix codeword "1"
-            2 | (0 << 2) | (2 << 5), //010 == x10, prefix codeword "01"
-            1 | (0 << 2) | (1 << 5), //011 == xx1, prefix codeword "1"
-            3 | (1 << 2) | (3 << 5), //100 == 100, prefix codeword "001"
-            1 | (0 << 2) | (1 << 5), //101 == xx1, prefix codeword "1"
-            2 | (0 << 2) | (2 << 5), //110 == x10, prefix codeword "01"
-            1 | (0 << 2) | (1 << 5)  //111 == xx1, prefix codeword "1"
+        3 | (5 << 2) | (5 << 5), //000 == 000, prefix codeword "000"
+        1 | (0 << 2) | (1 << 5), //001 == xx1, prefix codeword "1"
+        2 | (0 << 2) | (2 << 5), //010 == x10, prefix codeword "01"
+        1 | (0 << 2) | (1 << 5), //011 == xx1, prefix codeword "1"
+        3 | (1 << 2) | (3 << 5), //100 == 100, prefix codeword "001"
+        1 | (0 << 2) | (1 << 5), //101 == xx1, prefix codeword "1"
+        2 | (0 << 2) | (2 << 5), //110 == x10, prefix codeword "01"
+        1 | (0 << 2) | (1 << 5)  //111 == xx1, prefix codeword "1"
     };
 
     OPJ_UINT32 consumed_bits = 0;
@@ -868,7 +884,7 @@ OPJ_UINT32 decode_noninit_uvlc(OPJ_UINT32 vlc, OPJ_UINT32 mode, OPJ_UINT32 *u) {
   *         bitstreams; these are: MagSgn and SPP bitstreams
   */
 typedef struct frwd_struct {
-    const OPJ_UINT8 *data; //!<pointer to bitstream
+    const OPJ_UINT8* data; //!<pointer to bitstream
     OPJ_UINT64 tmp;        //!<temporary buffer of read data
     OPJ_UINT32 bits;       //!<number of bits stored in tmp
     OPJ_BOOL unstuff;      //!<true if a bit needs to be unstuffed from next byte
@@ -885,7 +901,7 @@ typedef struct frwd_struct {
   *  X controls this value.
   *
   *  Unstuffing prevent sequences that are more than 0xFF7F from appearing
-  *  in the conpressed sequence.  So whenever a value of 0xFF is coded, the
+  *  in the compressed sequence.  So whenever a value of 0xFF is coded, the
   *  MSB of the next byte is set 0 and must be ignored during decoding.
   *
   *  Reading can go beyond the end of buffer by up to 3 bytes.
@@ -894,7 +910,8 @@ typedef struct frwd_struct {
   *
   */
 static INLINE
-void frwd_read(frwd_struct_t *msp) {
+void frwd_read(frwd_struct_t *msp)
+{
     OPJ_UINT32 val;
     OPJ_UINT32 bits;
     OPJ_UINT32 t;
@@ -938,7 +955,7 @@ void frwd_read(frwd_struct_t *msp) {
     bits += 8u - (unstuff ? 1u : 0u);
     msp->unstuff = (((val >> 24) & 0xFF) == 0xFF); // for next byte
 
-    msp->tmp |= ((OPJ_UINT64) t) << msp->bits;  // move data to msp->tmp
+    msp->tmp |= ((OPJ_UINT64)t) << msp->bits;  // move data to msp->tmp
     msp->bits += bits;
 }
 
@@ -952,8 +969,9 @@ void frwd_read(frwd_struct_t *msp) {
   *               See frwd_read.
   */
 static INLINE
-void frwd_init(frwd_struct_t *msp, const OPJ_UINT8 *data, int size,
-               OPJ_UINT32 X) {
+void frwd_init(frwd_struct_t *msp, const OPJ_UINT8* data, int size,
+               OPJ_UINT32 X)
+{
     int num, i;
 
     msp->data = data;
@@ -968,7 +986,7 @@ void frwd_init(frwd_struct_t *msp, const OPJ_UINT8 *data, int size,
     // align to the read size (address multiple of 4 if read size is 4)
     //These few lines take care of the case where data is not at a multiple
     // of 4 boundary.  It reads 1,2,3 up to 4 bytes from the bitstream
-    num = 4 - (int) ((intptr_t) (msp->data) & 0x3);
+    num = 4 - (int)((intptr_t)(msp->data) & 0x3);
     for (i = 0; i < num; ++i) {
         OPJ_UINT64 d;
         //read a byte if the buffer is not exhausted, otherwise set it to X
@@ -987,7 +1005,8 @@ void frwd_init(frwd_struct_t *msp, const OPJ_UINT8 *data, int size,
   *  @param [in]  num_bits is the number of bit to consume
   */
 static INLINE
-void frwd_advance(frwd_struct_t *msp, OPJ_UINT32 num_bits) {
+void frwd_advance(frwd_struct_t *msp, OPJ_UINT32 num_bits)
+{
     assert(num_bits <= msp->bits);
     msp->tmp >>= num_bits;  // consume num_bits
     msp->bits -= num_bits;
@@ -999,27 +1018,29 @@ void frwd_advance(frwd_struct_t *msp, OPJ_UINT32 num_bits) {
   *  @param [in]  msp is a pointer to frwd_struct_t
   */
 static INLINE
-OPJ_UINT32 frwd_fetch(frwd_struct_t *msp) {
+OPJ_UINT32 frwd_fetch(frwd_struct_t *msp)
+{
     if (msp->bits < 32) {
         frwd_read(msp);
         if (msp->bits < 32) { //need to test
             frwd_read(msp);
         }
     }
-    return (OPJ_UINT32) msp->tmp;
+    return (OPJ_UINT32)msp->tmp;
 }
 
 //************************************************************************/
 /** @brief Allocates T1 buffers
   *
-  *  @param [in, out]  t1 is codeblock cofficients storage
+  *  @param [in, out]  t1 is codeblock coefficients storage
   *  @param [in]       w is codeblock width
   *  @param [in]       h is codeblock height
   */
 static OPJ_BOOL opj_t1_allocate_buffers(
-        opj_t1_t *t1,
-        OPJ_UINT32 w,
-        OPJ_UINT32 h) {
+    opj_t1_t *t1,
+    OPJ_UINT32 w,
+    OPJ_UINT32 h)
+{
     OPJ_UINT32 flagssize;
 
     /* No risk of overflow. Prior checks ensure those assert are met */
@@ -1034,8 +1055,8 @@ static OPJ_BOOL opj_t1_allocate_buffers(
 
         if (datasize > t1->datasize) {
             opj_aligned_free(t1->data);
-            t1->data = (OPJ_INT32 *)
-                    opj_aligned_malloc(datasize * sizeof(OPJ_INT32));
+            t1->data = (OPJ_INT32*)
+                       opj_aligned_malloc(datasize * sizeof(OPJ_INT32));
             if (!t1->data) {
                 /* FIXME event manager error callback */
                 return OPJ_FALSE;
@@ -1058,7 +1079,7 @@ static OPJ_BOOL opj_t1_allocate_buffers(
         if (flagssize > t1->flagssize) {
 
             opj_aligned_free(t1->flags);
-            t1->flags = (opj_flag_t *) opj_aligned_malloc(flagssize * sizeof(opj_flag_t));
+            t1->flags = (opj_flag_t*) opj_aligned_malloc(flagssize * sizeof(opj_flag_t));
             if (!t1->flags) {
                 /* FIXME event manager error callback */
                 return OPJ_FALSE;
@@ -1087,19 +1108,19 @@ Decode 1 HT code-block
 @param check_pterm whether PTERM correct termination should be checked
 */
 OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
-                               opj_tcd_cblk_dec_t *cblk,
+                               opj_tcd_cblk_dec_t* cblk,
                                OPJ_UINT32 orient,
                                OPJ_UINT32 roishift,
                                OPJ_UINT32 cblksty,
                                opj_event_mgr_t *p_manager,
-                               opj_mutex_t *p_manager_mutex,
+                               opj_mutex_t* p_manager_mutex,
                                OPJ_BOOL check_pterm);
 
 //************************************************************************/
 /** @brief Decodes one codeblock, processing the cleanup, siginificance
   *         propagation, and magnitude refinement pass
   *
-  *  @param [in, out]  t1 is codeblock cofficients storage
+  *  @param [in, out]  t1 is codeblock coefficients storage
   *  @param [in]       cblk is codeblock properties
   *  @param [in]       orient is the subband to which the codeblock belongs (not needed)
   *  @param [in]       roishift is region of interest shift
@@ -1109,16 +1130,17 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
   *  @param [in]       check_pterm: check termination (not used)
   */
 OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
-                               opj_tcd_cblk_dec_t *cblk,
+                               opj_tcd_cblk_dec_t* cblk,
                                OPJ_UINT32 orient,
                                OPJ_UINT32 roishift,
                                OPJ_UINT32 cblksty,
                                opj_event_mgr_t *p_manager,
-                               opj_mutex_t *p_manager_mutex,
-                               OPJ_BOOL check_pterm) {
-    OPJ_BYTE *cblkdata = NULL;
-    OPJ_UINT8 *coded_data;
-    OPJ_UINT32 *decoded_data;
+                               opj_mutex_t* p_manager_mutex,
+                               OPJ_BOOL check_pterm)
+{
+    OPJ_BYTE* cblkdata = NULL;
+    OPJ_UINT8* coded_data;
+    OPJ_UINT32* decoded_data;
     OPJ_UINT32 zero_bplanes;
     OPJ_UINT32 num_passes;
     OPJ_UINT32 lengths1;
@@ -1140,13 +1162,13 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
     OPJ_UINT32 vlc_val;              // fetched data from VLC bitstream
     OPJ_UINT32 qinf[2];
     OPJ_UINT32 c_q;
-    OPJ_UINT32 *sp;
+    OPJ_UINT32* sp;
     OPJ_INT32 x, y; // loop indices
     OPJ_BOOL stripe_causal = (cblksty & J2K_CCP_CBLKSTY_VSC) != 0;
     OPJ_UINT32 cblk_len = 0;
 
-    (void) (orient);      // stops unused parameter message
-    (void) (check_pterm); // stops unused parameter message
+    (void)(orient);      // stops unused parameter message
+    (void)(check_pterm); // stops unused parameter message
 
     // We ignor orient, because the same decoder is used for all subbands
     // We also ignore check_pterm, because I am not sure how it applies
@@ -1155,7 +1177,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             opj_mutex_lock(p_manager_mutex);
         }
         opj_event_msg(p_manager, EVT_ERROR, "We do not support ROI in decoding "
-                                            "HT codeblocks\n");
+                      "HT codeblocks\n");
         if (p_manager_mutex) {
             opj_mutex_unlock(p_manager_mutex);
         }
@@ -1163,9 +1185,9 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
     }
 
     if (!opj_t1_allocate_buffers(
-            t1,
-            (OPJ_UINT32) (cblk->x1 - cblk->x0),
-            (OPJ_UINT32) (cblk->y1 - cblk->y0))) {
+                t1,
+                (OPJ_UINT32)(cblk->x1 - cblk->x0),
+                (OPJ_UINT32)(cblk->y1 - cblk->y0))) {
         return OPJ_FALSE;
     }
 
@@ -1190,8 +1212,8 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
 
         /* Allocate temporary memory if needed */
         if (cblk_len > t1->cblkdatabuffersize) {
-            cblkdata = (OPJ_BYTE *) opj_realloc(
-                    t1->cblkdatabuffer, cblk_len);
+            cblkdata = (OPJ_BYTE*)opj_realloc(
+                           t1->cblkdatabuffer, cblk_len);
             if (cblkdata == NULL) {
                 return OPJ_FALSE;
             }
@@ -1220,7 +1242,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
     // OPJ_BYTE* coded_data is a pointer to bitstream
     coded_data = cblkdata;
     // OPJ_UINT32* decoded_data is a pointer to decoded codeblock data buf.
-    decoded_data = (OPJ_UINT32 *) t1->data;
+    decoded_data = (OPJ_UINT32*)t1->data;
     // OPJ_UINT32 num_passes is the number of passes: 1 if CUP only, 2 for
     // CUP+SPP, and 3 for CUP+SPP+MRP
     num_passes = cblk->numsegs > 0 ? cblk->segs[0].real_num_passes : 0;
@@ -1250,7 +1272,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
      *  To work in OpenJPEG these buffers has been expanded to 132.
      */
     // OPJ_UINT32 *pflags, *sigma1, *sigma2, *mbr1, *mbr2, *sip, sip_shift;
-    pflags = (OPJ_UINT32 *) t1->flags;
+    pflags = (OPJ_UINT32 *)t1->flags;
     sigma1 = pflags;
     sigma2 = sigma1 + 132;
     // mbr arrangement is similar to sigma; mbr contains locations
@@ -1266,8 +1288,8 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             opj_mutex_lock(p_manager_mutex);
         }
         opj_event_msg(p_manager, EVT_WARNING, "A malformed codeblock that has "
-                                              "more than one coding pass, but zero length for "
-                                              "2nd and potentially the 3rd pass in an HT codeblock.\n");
+                      "more than one coding pass, but zero length for "
+                      "2nd and potentially the 3rd pass in an HT codeblock.\n");
         if (p_manager_mutex) {
             opj_mutex_unlock(p_manager_mutex);
         }
@@ -1278,8 +1300,8 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             opj_mutex_lock(p_manager_mutex);
         }
         opj_event_msg(p_manager, EVT_ERROR, "We do not support more than 3 "
-                                            "coding passes in an HT codeblock; This codeblocks has "
-                                            "%d passes.\n", num_passes);
+                      "coding passes in an HT codeblock; This codeblocks has "
+                      "%d passes.\n", num_passes);
         if (p_manager_mutex) {
             opj_mutex_unlock(p_manager_mutex);
         }
@@ -1300,8 +1322,8 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             opj_mutex_lock(p_manager_mutex);
         }
         opj_event_msg(p_manager, EVT_ERROR, "32 bits are not enough to "
-                                            "decode this codeblock, since the number of "
-                                            "bitplane, %d, is larger than 30.\n", cblk->Mb);
+                      "decode this codeblock, since the number of "
+                      "bitplane, %d, is larger than 30.\n", cblk->Mb);
         if (p_manager_mutex) {
             opj_mutex_unlock(p_manager_mutex);
         }
@@ -1316,8 +1338,8 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             opj_mutex_lock(p_manager_mutex);
         }
         opj_event_msg(p_manager, EVT_ERROR, "Malformed HT codeblock. "
-                                            "Decoding this codeblock is stopped. There are "
-                                            "%d zero bitplanes in %d bitplanes.\n",
+                      "Decoding this codeblock is stopped. There are "
+                      "%d zero bitplanes in %d bitplanes.\n",
                       zero_bplanes, cblk->Mb);
 
         if (p_manager_mutex) {
@@ -1338,11 +1360,11 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             if (only_cleanup_pass_is_decoded == OPJ_FALSE) {
                 only_cleanup_pass_is_decoded = OPJ_TRUE;
                 opj_event_msg(p_manager, EVT_WARNING, "Malformed HT codeblock. "
-                                                      "When the number of zero planes bitplanes is "
-                                                      "equal to the number of bitplanes, only the cleanup "
-                                                      "pass makes sense, but we have %d passes in this "
-                                                      "codeblock. Therefore, only the cleanup pass will be "
-                                                      "decoded. This message will not be displayed again.\n",
+                              "When the number of zero planes bitplanes is "
+                              "equal to the number of bitplanes, only the cleanup "
+                              "pass makes sense, but we have %d passes in this "
+                              "codeblock. Therefore, only the cleanup pass will be "
+                              "decoded. This message will not be displayed again.\n",
                               num_passes);
             }
             if (p_manager_mutex) {
@@ -1358,13 +1380,13 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
     // OPJ_UINT32 zero planes plus 1
     zero_bplanes_p1 = zero_bplanes + 1;
 
-    if (lengths1 < 2 || (OPJ_UINT32) lengths1 > cblk_len ||
-        (OPJ_UINT32) (lengths1 + lengths2) > cblk_len) {
+    if (lengths1 < 2 || (OPJ_UINT32)lengths1 > cblk_len ||
+            (OPJ_UINT32)(lengths1 + lengths2) > cblk_len) {
         if (p_manager_mutex) {
             opj_mutex_lock(p_manager_mutex);
         }
         opj_event_msg(p_manager, EVT_ERROR, "Malformed HT codeblock. "
-                                            "Invalid codeblock length values.\n");
+                      "Invalid codeblock length values.\n");
 
         if (p_manager_mutex) {
             opj_mutex_unlock(p_manager_mutex);
@@ -1372,17 +1394,17 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
         return OPJ_FALSE;
     }
     // read scup and fix the bytes there
-    lcup = (int) lengths1;  // length of CUP
+    lcup = (int)lengths1;  // length of CUP
     //scup is the length of MEL + VLC
-    scup = (((int) coded_data[lcup - 1]) << 4) + (coded_data[lcup - 2] & 0xF);
+    scup = (((int)coded_data[lcup - 1]) << 4) + (coded_data[lcup - 2] & 0xF);
     if (scup < 2 || scup > lcup || scup > 4079) { //something is wrong
         /* The standard stipulates 2 <= Scup <= min(Lcup, 4079) */
         if (p_manager_mutex) {
             opj_mutex_lock(p_manager_mutex);
         }
         opj_event_msg(p_manager, EVT_ERROR, "Malformed HT codeblock. "
-                                            "One of the following condition is not met: "
-                                            "2 <= Scup <= min(Lcup, 4079)\n");
+                      "One of the following condition is not met: "
+                      "2 <= Scup <= min(Lcup, 4079)\n");
 
         if (p_manager_mutex) {
             opj_mutex_unlock(p_manager_mutex);
@@ -1396,7 +1418,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             opj_mutex_lock(p_manager_mutex);
         }
         opj_event_msg(p_manager, EVT_ERROR, "Malformed HT codeblock. "
-                                            "Incorrect MEL segment sequence.\n");
+                      "Incorrect MEL segment sequence.\n");
         if (p_manager_mutex) {
             opj_mutex_unlock(p_manager_mutex);
         }
@@ -1405,10 +1427,10 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
     rev_init(&vlc, coded_data, lcup, scup);
     frwd_init(&magsgn, coded_data, lcup - scup, 0xFF);
     if (num_passes > 1) { // needs to be tested
-        frwd_init(&sigprop, coded_data + lengths1, (int) lengths2, 0);
+        frwd_init(&sigprop, coded_data + lengths1, (int)lengths2, 0);
     }
     if (num_passes > 2) {
-        rev_init_mrp(&magref, coded_data, (int) lengths1, (int) lengths2);
+        rev_init_mrp(&magref, coded_data, (int)lengths1, (int)lengths2);
     }
 
     /** State storage
@@ -1422,7 +1444,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
 
     // 514 is enough for a block width of 1024, +2 extra
     // here expanded to 528
-    line_state = (OPJ_UINT8 *) (mbr2 + 132);
+    line_state = (OPJ_UINT8 *)(mbr2 + 132);
 
     //initial 2 lines
     /////////////////
@@ -1456,7 +1478,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
         vlc_val = rev_fetch(&vlc);
 
         //decode VLC using the context c_q and the head of the VLC bitstream
-        qinf[0] = vlc_tbl0[(c_q << 7) | (vlc_val & 0x7F)];
+        qinf[0] = vlc_tbl0[(c_q << 7) | (vlc_val & 0x7F) ];
 
         if (c_q == 0) { // if zero context, we need to use one MEL event
             run -= 2; //the number of 0 events is multiplied by 2, so subtract 2
@@ -1558,8 +1580,8 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                 opj_mutex_lock(p_manager_mutex);
             }
             opj_event_msg(p_manager, EVT_ERROR, "Malformed HT codeblock. Decoding "
-                                                "this codeblock is stopped. U_q is larger than zero "
-                                                "bitplanes + 1 \n");
+                          "this codeblock is stopped. U_q is larger than zero "
+                          "bitplanes + 1 \n");
             if (p_manager_mutex) {
                 opj_mutex_unlock(p_manager_mutex);
             }
@@ -1584,8 +1606,8 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                 opj_mutex_lock(p_manager_mutex);
             }
             opj_event_msg(p_manager, EVT_ERROR, "Malformed HT codeblock. "
-                                                "VLC code produces significant samples outside "
-                                                "the codeblock area.\n");
+                          "VLC code produces significant samples outside "
+                          "the codeblock area.\n");
             if (p_manager_mutex) {
                 opj_mutex_unlock(p_manager_mutex);
             }
@@ -1628,7 +1650,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             //update line_state: bit 7 (\sigma^N), and E^N
             t = lsp[0] & 0x7F;       // keep E^NW
             v_n = 32 - count_leading_zeros(v_n);
-            lsp[0] = (OPJ_UINT8) (0x80 | (t > v_n ? t : v_n)); //max(E^NW, E^N) | s
+            lsp[0] = (OPJ_UINT8)(0x80 | (t > v_n ? t : v_n)); //max(E^NW, E^N) | s
         } else if (locs & 0x2) { // if this is inside the codeblock, set the
             sp[stride] = 0;      // sample to zero
         }
@@ -1665,7 +1687,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             sp[stride] = val | ((v_n + 2) << (p - 1));
 
             //line_state: bit 7 (\sigma^NW), and E^NW for next quad
-            lsp[0] = (OPJ_UINT8) (0x80 | (32 - count_leading_zeros(v_n)));
+            lsp[0] = (OPJ_UINT8)(0x80 | (32 - count_leading_zeros(v_n)));
         } else if (locs & 0x8) { //if outside set to 0
             sp[stride] = 0;
         }
@@ -1703,7 +1725,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             //update line_state: bit 7 (\sigma^N), and E^N
             t = lsp[0] & 0x7F;            //E^NW
             v_n = 32 - count_leading_zeros(v_n);     //E^N
-            lsp[0] = (OPJ_UINT8) (0x80 | (t > v_n ? t : v_n)); //max(E^NW, E^N) | s
+            lsp[0] = (OPJ_UINT8)(0x80 | (t > v_n ? t : v_n)); //max(E^NW, E^N) | s
         } else if (locs & 0x20) {
             sp[stride] = 0;    //no need to update line_state
         }
@@ -1740,7 +1762,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
             sp[stride] = val | ((v_n + 2) << (p - 1));
 
             //line_state: bit 7 (\sigma^NW), and E^NW for next quad
-            lsp[0] = (OPJ_UINT8) (0x80 | (32 - count_leading_zeros(v_n)));
+            lsp[0] = (OPJ_UINT8)(0x80 | (32 - count_leading_zeros(v_n)));
         } else if (locs & 0x80) {
             sp[stride] = 0;
         }
@@ -1859,8 +1881,8 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                     opj_mutex_lock(p_manager_mutex);
                 }
                 opj_event_msg(p_manager, EVT_ERROR, "Malformed HT codeblock. "
-                                                    "Decoding this codeblock is stopped. U_q is"
-                                                    "larger than bitplanes + 1 \n");
+                              "Decoding this codeblock is stopped. U_q is"
+                              "larger than bitplanes + 1 \n");
                 if (p_manager_mutex) {
                     opj_mutex_unlock(p_manager_mutex);
                 }
@@ -1885,13 +1907,14 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                     opj_mutex_lock(p_manager_mutex);
                 }
                 opj_event_msg(p_manager, EVT_ERROR, "Malformed HT codeblock. "
-                                                    "VLC code produces significant samples outside "
-                                                    "the codeblock area.\n");
+                              "VLC code produces significant samples outside "
+                              "the codeblock area.\n");
                 if (p_manager_mutex) {
                     opj_mutex_unlock(p_manager_mutex);
                 }
                 return OPJ_FALSE;
             }
+
 
 
             if (qinf[0] & 0x10) { //sigma_n
@@ -1924,7 +1947,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                 //update line_state: bit 7 (\sigma^N), and E^N
                 t = lsp[0] & 0x7F;          //E^NW
                 v_n = 32 - count_leading_zeros(v_n);
-                lsp[0] = (OPJ_UINT8) (0x80 | (t > v_n ? t : v_n));
+                lsp[0] = (OPJ_UINT8)(0x80 | (t > v_n ? t : v_n));
             } else if (locs & 0x2) {
                 sp[stride] = 0;    //no need to update line_state
             }
@@ -1960,7 +1983,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                 sp[stride] = val | ((v_n + 2) << (p - 1));
 
                 //update line_state: bit 7 (\sigma^NW), and E^NW for next quad
-                lsp[0] = (OPJ_UINT8) (0x80 | (32 - count_leading_zeros(v_n)));
+                lsp[0] = (OPJ_UINT8)(0x80 | (32 - count_leading_zeros(v_n)));
             } else if (locs & 0x8) {
                 sp[stride] = 0;
             }
@@ -1997,7 +2020,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                 //update line_state: bit 7 (\sigma^N), and E^N
                 t = lsp[0] & 0x7F;          //E^NW
                 v_n = 32 - count_leading_zeros(v_n);
-                lsp[0] = (OPJ_UINT8) (0x80 | (t > v_n ? t : v_n));
+                lsp[0] = (OPJ_UINT8)(0x80 | (t > v_n ? t : v_n));
             } else if (locs & 0x20) {
                 sp[stride] = 0;    //no need to update line_state
             }
@@ -2033,7 +2056,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                 sp[stride] = val | ((v_n + 2) << (p - 1));
 
                 //update line_state: bit 7 (\sigma^NW), and E^NW for next quad
-                lsp[0] = (OPJ_UINT8) (0x80 | (32 - count_leading_zeros(v_n)));
+                lsp[0] = (OPJ_UINT8)(0x80 | (32 - count_leading_zeros(v_n)));
             } else if (locs & 0x80) {
                 sp[stride] = 0;
             }
@@ -2181,7 +2204,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                 val = 3u << (p - 2); // sample values for newly discovered
                 // significant samples including the bin center
                 for (i = 0; i < width;
-                     i += 8, cur_sig++, cur_mbr++, nxt_sig++, nxt_mbr++) {
+                        i += 8, cur_sig++, cur_mbr++, nxt_sig++, nxt_mbr++) {
                     OPJ_UINT32 ux, tx;
                     OPJ_UINT32 mbr = *cur_mbr;
                     OPJ_UINT32 new_sig = 0;
@@ -2346,7 +2369,7 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
                 //clear current sigma
                 //mbr need not be cleared because it is overwritten
                 cur_sig = y & 0x4 ? sigma2 : sigma1;
-                memset(cur_sig, 0, ((((OPJ_UINT32) width + 7u) >> 3) + 1u) << 2);
+                memset(cur_sig, 0, ((((OPJ_UINT32)width + 7u) >> 3) + 1u) << 2);
             }
         }
     }
@@ -2654,10 +2677,10 @@ OPJ_BOOL opj_t1_ht_decode_cblk(opj_t1_t *t1,
     {
         OPJ_INT32 x, y;
         for (y = 0; y < height; ++y) {
-            OPJ_INT32 *sp = (OPJ_INT32 *) decoded_data + y * stride;
+            OPJ_INT32* sp = (OPJ_INT32*)decoded_data + y * stride;
             for (x = 0; x < width; ++x, ++sp) {
                 OPJ_INT32 val = (*sp & 0x7FFFFFFF);
-                *sp = ((OPJ_UINT32) *sp & 0x80000000) ? -val : val;
+                *sp = ((OPJ_UINT32) * sp & 0x80000000) ? -val : val;
             }
         }
     }

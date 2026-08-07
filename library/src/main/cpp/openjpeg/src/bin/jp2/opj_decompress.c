@@ -166,7 +166,6 @@ typedef struct opj_decompress_params {
 unsigned int get_num_images(char *imgdirpath);
 int load_images(dircnt_t *dirptr, char *imgdirpath);
 int get_file_format(const char *filename);
-
 char get_next_file(unsigned int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
                    opj_decompress_parameters *parameters);
 static int infile_format(const char *fname);
@@ -191,7 +190,7 @@ static void decode_help_display(void)
             "\n"
             "  -ImgDir <directory> \n"
             "	Image file Directory path \n"
-                    "  -OutFor <PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|TIFF|RAW|YUV|RAWL|TGA>\n"
+            "  -OutFor <PBM|PGM|PPM|PNM|PAM|PGX|PNG|BMP|TIF|TIFF|RAW|YUV|RAWL|TGA>\n"
             "    REQUIRED only if -ImgDir is used\n"
             "	Output format for decompressed images.\n");
     fprintf(stdout, "  -i <compressed file>\n"
@@ -250,7 +249,7 @@ static void decode_help_display(void)
                 "    Number of threads to use for decoding or ALL_CPUS for all available cores.\n");
     }
     fprintf(stdout, "  -allow-partial\n"
-                    "    Disable strict mode to allow decoding partial codestreams.\n");
+            "    Disable strict mode to allow decoding partial codestreams.\n");
     fprintf(stdout, "  -quiet\n"
             "    Disable output from the library and other output.\n");
     /* UniPG>> */
@@ -439,23 +438,23 @@ int load_images(dircnt_t *dirptr, char *imgdirpath)
 int get_file_format(const char *filename)
 {
     unsigned int i;
-    static const char *const extension[] = {
-            "pgx", "pnm", "pgm", "ppm", "bmp",
-            "tif", "tiff",
-            "raw", "yuv", "rawl",
-            "tga", "png",
-            "j2k", "jp2", "jpt", "j2c", "jpc",
-            "jph", /* HTJ2K with JP2 boxes */
-            "jhc" /* HTJ2K codestream */
+    static const char * const extension[] = {
+        "pgx", "pnm", "pgm", "ppm", "bmp",
+        "tif", "tiff",
+        "raw", "yuv", "rawl",
+        "tga", "png",
+        "j2k", "jp2", "jpt", "j2c", "jpc",
+        "jph", /* HTJ2K with JP2 boxes */
+        "jhc" /* HTJ2K codestream */
     };
     static const int format[] = {
-            PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT,
-            TIF_DFMT, TIF_DFMT,
-            RAW_DFMT, RAW_DFMT, RAWL_DFMT,
-            TGA_DFMT, PNG_DFMT,
-            J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT,
-            JP2_CFMT, /* HTJ2K with JP2 boxes */
-            J2K_CFMT /* HTJ2K codestream */
+        PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT,
+        TIF_DFMT, TIF_DFMT,
+        RAW_DFMT, RAW_DFMT, RAWL_DFMT,
+        TGA_DFMT, PNG_DFMT,
+        J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT,
+        JP2_CFMT, /* HTJ2K with JP2 boxes */
+        J2K_CFMT /* HTJ2K codestream */
     };
     const char * ext = strrchr(filename, '.');
     if (ext == NULL) {
@@ -490,7 +489,7 @@ char get_next_file(unsigned int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
     strcpy(image_filename, dirptr->filename[imageno]);
     fprintf(stderr, "File Number %u \"%s\"\n", imageno, image_filename);
     if (strlen(img_fol->imgdirpath) + strlen(path_separator) + strlen(
-            image_filename) + 1 > sizeof(infilename)) {
+                image_filename) + 1 > sizeof(infilename)) {
         return 1;
     }
     strcpy(infilename, img_fol->imgdirpath);
@@ -513,7 +512,7 @@ char get_next_file(unsigned int imageno, dircnt_t *dirptr, img_fol_t *img_fol,
     }
     if (img_fol->set_out_format == 1) {
         if (strlen(img_fol->imgdirpath) + 1 + strlen(temp_ofname) + 1 + strlen(
-                img_fol->out_format) + 1 > sizeof(outfilename)) {
+                    img_fol->out_format) + 1 > sizeof(outfilename)) {
             return 1;
         }
         strcpy(outfilename, img_fol->imgdirpath);
@@ -606,7 +605,7 @@ int parse_cmdline_decoder(int argc, char **argv,
         {"split-pnm", NO_ARG,  NULL, 1},
         {"threads",   REQ_ARG, NULL, 'T'},
         {"quiet", NO_ARG,  NULL, 1},
-        {"allow-partial", NO_ARG, NULL, 1},
+        {"allow-partial", NO_ARG,  NULL, 1},
     };
 
     const char optlist[] = "i:o:r:l:x:d:t:p:c:"
@@ -816,7 +815,7 @@ int parse_cmdline_decoder(int argc, char **argv,
         break;
 
         /* ----------------------------------------------------- */
-            case 'c': { /* Components */
+        case 'c': { /* Components */
             const char* iter = opj_optarg;
             while (1) {
                 parameters->numcomps ++;
@@ -938,7 +937,7 @@ int parse_cmdline_decoder(int argc, char **argv,
             fprintf(stderr,
                     "[ERROR] When -ImgDir is used, -OutFor <FORMAT> must be used.\n");
             fprintf(stderr, "Only one format allowed.\n"
-                            "Valid format are PGM, PPM, PNM, PGX, BMP, TIF, TIFF, RAW, YUV, and TGA.\n");
+                    "Valid format are PGM, PPM, PNM, PGX, BMP, TIF, TIFF, RAW, YUV, and TGA.\n");
             return 1;
         }
         if (!((parameters->outfile[0] == 0))) {
@@ -1386,7 +1385,7 @@ int main(int argc, char **argv)
             failed = 1;
             goto fin;
         }
-        dirptr = (dircnt_t *) calloc(1, sizeof(dircnt_t));
+        dirptr = (dircnt_t*)calloc(1, sizeof(dircnt_t));
         if (!dirptr) {
             destroy_parameters(&parameters);
             return EXIT_FAILURE;
@@ -1398,15 +1397,15 @@ int main(int argc, char **argv)
             goto fin;
         }
 
-        dirptr->filename = (char **) calloc((size_t) num_images, sizeof(char *));
+        dirptr->filename = (char**) calloc((size_t) num_images, sizeof(char*));
 
         if (!dirptr->filename) {
             failed = 1;
             goto fin;
         }
         for (it_image = 0; it_image < num_images; it_image++) {
-            dirptr->filename[it_image] = dirptr->filename_buf + (size_t) it_image *
-                                                                OPJ_PATH_LEN;
+            dirptr->filename[it_image] = dirptr->filename_buf + (size_t)it_image *
+                                         OPJ_PATH_LEN;
         }
 
         if (load_images(dirptr, img_fol.imgdirpath) == 1) {
@@ -1500,7 +1499,7 @@ int main(int argc, char **argv)
 
         /* Disable strict mode if we want to decode partial codestreams. */
         if (parameters.allow_partial &&
-            !opj_decoder_set_strict_mode(l_codec, OPJ_FALSE)) {
+                !opj_decoder_set_strict_mode(l_codec, OPJ_FALSE)) {
             fprintf(stderr, "ERROR -> opj_decompress: failed to disable strict mode\n");
             opj_stream_destroy(l_stream);
             opj_destroy_codec(l_codec);
@@ -1746,14 +1745,14 @@ int main(int argc, char **argv)
             }
             break;
 #ifdef OPJ_HAVE_LIBTIFF
-                case TIF_DFMT:          /* TIF(F) */
-                    if (imagetotif(image, parameters.outfile)) {
-                        fprintf(stderr, "[ERROR] Outfile %s not generated\n", parameters.outfile);
-                        failed = 1;
-                    } else if (!(parameters.quiet)) {
-                        fprintf(stdout, "[INFO] Generated Outfile %s\n", parameters.outfile);
-                    }
-                    break;
+        case TIF_DFMT:          /* TIF(F) */
+            if (imagetotif(image, parameters.outfile)) {
+                fprintf(stderr, "[ERROR] Outfile %s not generated\n", parameters.outfile);
+                failed = 1;
+            } else if (!(parameters.quiet)) {
+                fprintf(stdout, "[INFO] Generated Outfile %s\n", parameters.outfile);
+            }
+            break;
 #endif /* OPJ_HAVE_LIBTIFF */
         case RAW_DFMT:          /* RAW */
             if (imagetoraw(image, parameters.outfile)) {
@@ -1797,9 +1796,9 @@ int main(int argc, char **argv)
             }
             break;
 #endif /* OPJ_HAVE_LIBPNG */
-                /* Can happen if output file is TIF(F) or PNG
-                 * and OPJ_HAVE_LIBTIF or OPJ_HAVE_LIBPNG is undefined
-                */
+        /* Can happen if output file is TIF(F) or PNG
+         * and OPJ_HAVE_LIBTIF or OPJ_HAVE_LIBPNG is undefined
+        */
         default:
             fprintf(stderr, "[ERROR] Outfile %s not generated\n", parameters.outfile);
             failed = 1;

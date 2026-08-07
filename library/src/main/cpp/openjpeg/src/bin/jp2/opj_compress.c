@@ -532,13 +532,10 @@ static int get_file_format(char *filename)
 {
     unsigned int i;
     static const char *extension[] = {
-            "pgx", "pnm", "pgm", "ppm", "pbm", "pam", "bmp", "tif", "tiff", "raw", "yuv", "rawl",
-            "tga", "png", "j2k", "jp2", "j2c", "jpc"
+        "pgx", "pnm", "pgm", "ppm", "pbm", "pam", "bmp", "tif", "tiff", "raw", "yuv", "rawl", "tga", "png", "j2k", "jp2", "j2c", "jpc"
     };
     static const int format[] = {
-            PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT,
-            TIF_DFMT, RAW_DFMT, RAW_DFMT, RAWL_DFMT, TGA_DFMT, PNG_DFMT, J2K_CFMT, JP2_CFMT,
-            J2K_CFMT, J2K_CFMT
+        PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, TIF_DFMT, RAW_DFMT, RAW_DFMT, RAWL_DFMT, TGA_DFMT, PNG_DFMT, J2K_CFMT, JP2_CFMT, J2K_CFMT, J2K_CFMT
     };
     char * ext = strrchr(filename, '.');
     if (ext == NULL) {
@@ -574,7 +571,7 @@ static char get_next_file(unsigned int imageno, dircnt_t *dirptr,
         return 1;
     }
     if (strlen(img_fol->imgdirpath) + 1 + strlen(image_filename) + 1 > sizeof(
-            infilename)) {
+                infilename)) {
         return 1;
     }
     strcpy(infilename, img_fol->imgdirpath);
@@ -593,7 +590,7 @@ static char get_next_file(unsigned int imageno, dircnt_t *dirptr,
     }
     if (img_fol->set_out_format == 1) {
         if (strlen(img_fol->imgdirpath) + 1 + strlen(temp_ofname) + 1 + strlen(
-                img_fol->out_format) + 1 > sizeof(outfilename)) {
+                    img_fol->out_format) + 1 > sizeof(outfilename)) {
             return 1;
         }
         strcpy(outfilename, img_fol->imgdirpath);
@@ -617,10 +614,10 @@ static int parse_cmdline_encoder(int argc, char **argv,
                                  size_t indexfilename_size,
                                  int* pOutFramerate,
                                  OPJ_BOOL* pOutPLT,
-                                 OPJ_BOOL *pOutTLM,
-                                 int *pOutGuardBits,
-                                 int *pOutNumThreads,
-                                 unsigned int *pTarget_bitdepth)
+                                 OPJ_BOOL* pOutTLM,
+                                 int* pOutGuardBits,
+                                 int* pOutNumThreads,
+                                 unsigned int* pTarget_bitdepth)
 {
     OPJ_UINT32 i, j;
     int totlen, c;
@@ -638,10 +635,10 @@ static int parse_cmdline_encoder(int argc, char **argv,
         {"mct", REQ_ARG, NULL, 'Y'},
         {"IMF", REQ_ARG, NULL, 'Z'},
         {"PLT", NO_ARG, NULL, 'A'},
-        {"threads",        REQ_ARG, NULL, 'B'},
-        {"TLM",            NO_ARG,  NULL, 'D'},
+        {"threads",   REQ_ARG, NULL, 'B'},
+        {"TLM", NO_ARG, NULL, 'D'},
         {"TargetBitDepth", REQ_ARG, NULL, 'X'},
-        {"GuardBits",      REQ_ARG, NULL, 'G'}
+        {"GuardBits", REQ_ARG, NULL, 'G'}
     };
 
     /* parse the command line */
@@ -731,7 +728,7 @@ static int parse_cmdline_encoder(int argc, char **argv,
         /* ----------------------------------------------------- */
 
 
-        case 'r': {         /* rates rates/distorsion */
+        case 'r': {         /* rates rates/distortion */
             char *s = opj_optarg;
             parameters->tcp_numlayers = 0;
             while (sscanf(s, "%f", &parameters->tcp_rates[parameters->tcp_numlayers]) ==
@@ -849,7 +846,7 @@ static int parse_cmdline_encoder(int argc, char **argv,
 
         /* ----------------------------------------------------- */
 
-            case 'q': {         /* layer allocation by distortion ratio (PSNR) */
+        case 'q': {         /* layer allocation by distortion ratio (PSNR) */
             char *s = opj_optarg;
             while (sscanf(s, "%f", &parameters->tcp_distoratio[parameters->tcp_numlayers])
                     == 1) {
@@ -869,7 +866,7 @@ static int parse_cmdline_encoder(int argc, char **argv,
         /* dda */
         /* ----------------------------------------------------- */
 
-            case 'f': {         /* layer allocation by fixed layer */
+        case 'f': {         /* layer allocation by fixed layer */
             int *row = NULL, *col = NULL;
             OPJ_UINT32 numlayers = 0, numresolution = 0, matrix_width = 0;
 
@@ -931,24 +928,24 @@ static int parse_cmdline_encoder(int argc, char **argv,
         break;
 
         /* ----------------------------------------------------- */
-            case 'X': {         /* target bitdepth */
-                char *s = opj_optarg;
-                sscanf(s, "%u", pTarget_bitdepth);
-                if (*pTarget_bitdepth == 0) {
-                    fprintf(stderr, "Target bitdepth must be at least 1 bit.\n");
-                    return 1;
-                }
+        case 'X': {         /* target bitdepth */
+            char *s = opj_optarg;
+            sscanf(s, "%u", pTarget_bitdepth);
+            if (*pTarget_bitdepth == 0) {
+                fprintf(stderr, "Target bitdepth must be at least 1 bit.\n");
+                return 1;
             }
-                break;
+        }
+        break;
 
-                /* ----------------------------------------------------- */
-            case 'G': {         /* guard bits */
-                char *s = opj_optarg;
-                sscanf(s, "%d", pOutGuardBits);
-            }
-                break;
+        /* ----------------------------------------------------- */
+        case 'G': {         /* guard bits */
+            char *s = opj_optarg;
+            sscanf(s, "%d", pOutGuardBits);
+        }
+        break;
 
-                /* ----------------------------------------------------- */
+        /* ----------------------------------------------------- */
 
         case 'n': {         /* resolution */
             sscanf(opj_optarg, "%d", &parameters->numresolution);
@@ -1756,12 +1753,12 @@ static int parse_cmdline_encoder(int argc, char **argv,
             }
         }
         break;
-                /* ------------------------------------------------------ */
+        /* ------------------------------------------------------ */
 
-            case 'D': {         /* TLM markers */
-                *pOutTLM = OPJ_TRUE;
-            }
-                break;
+        case 'D': {         /* TLM markers */
+            *pOutTLM = OPJ_TRUE;
+        }
+        break;
 
         /* ------------------------------------------------------ */
 
@@ -1798,8 +1795,8 @@ static int parse_cmdline_encoder(int argc, char **argv,
     }
 
     if ((parameters->decod_format == RAW_DFMT ||
-         parameters->decod_format == RAWL_DFMT)
-        && (raw_cp->rawWidth == 0)) {
+            parameters->decod_format == RAWL_DFMT)
+            && (raw_cp->rawWidth == 0)) {
         fprintf(stderr, "[ERROR] invalid raw or yuv image parameters\n");
         fprintf(stderr, "Please use the Format option -F:\n");
         fprintf(stderr,
@@ -1987,15 +1984,15 @@ int main(int argc, char **argv)
         }
         dirptr = (dircnt_t*)malloc(sizeof(dircnt_t));
         if (dirptr) {
-            dirptr->filename_buf = (char *) calloc(num_images, OPJ_PATH_LEN * sizeof(
+            dirptr->filename_buf = (char*)calloc(num_images, OPJ_PATH_LEN * sizeof(
                     char)); /* Stores at max 10 image file names*/
-            dirptr->filename = (char **) calloc(num_images, sizeof(char *));
+            dirptr->filename = (char**) calloc(num_images, sizeof(char*));
             if (!dirptr->filename_buf) {
                 ret = 0;
                 goto fin;
             }
             for (i = 0; i < num_images; i++) {
-                dirptr->filename[i] = dirptr->filename_buf + (size_t) i * OPJ_PATH_LEN;
+                dirptr->filename[i] = dirptr->filename_buf + (size_t)i * OPJ_PATH_LEN;
             }
         }
         if (load_images(dirptr, img_fol.imgdirpath) == 1) {
@@ -2218,7 +2215,7 @@ int main(int argc, char **argv)
         }
 
         {
-            const char *options[4] = {NULL, NULL, NULL, NULL};
+            const char* options[4] = { NULL, NULL, NULL, NULL };
             int iOpt = 0;
             char szGuardBits[32];
             if (PLT) {
@@ -2252,6 +2249,9 @@ int main(int argc, char **argv)
         /* open a byte stream for writing and allocate memory for all tiles */
         l_stream = opj_stream_create_default_file_stream(parameters.outfile, OPJ_FALSE);
         if (! l_stream) {
+            fprintf(stderr, "cannot create %s\n", parameters.outfile);
+            opj_destroy_codec(l_codec);
+            opj_image_destroy(image);
             ret = 1;
             goto fin;
         }
@@ -2266,6 +2266,9 @@ int main(int argc, char **argv)
             OPJ_UINT32 l_data_size = 512 * 512 * 3;
             l_data = (OPJ_BYTE*) calloc(1, l_data_size);
             if (l_data == NULL) {
+                opj_stream_destroy(l_stream);
+                opj_destroy_codec(l_codec);
+                opj_image_destroy(image);
                 ret = 1;
                 goto fin;
             }

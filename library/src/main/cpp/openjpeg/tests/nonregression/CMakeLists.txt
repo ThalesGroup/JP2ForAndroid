@@ -82,9 +82,9 @@ set(BLACKLIST_JPEG2000
     issue475.jp2 #kdu_jp2info ok
     issue413.jp2 #kdu_jp2info ok
     issue823.jp2 #kdu_jp2info ok
-    issue826.jp2 #inspection reveales that the transformation value is out of range
-    oss-fuzz2785.jp2 #inspection reveales that the transformation value is out of range
-        issue1438.j2k
+    issue826.jp2 #inspection reveals that the transformation value is out of range
+    oss-fuzz2785.jp2 #inspection reveals that the transformation value is out of range
+    issue1438.j2k
    )
 
 file(GLOB_RECURSE OPJ_DATA_NR_LIST
@@ -92,8 +92,8 @@ file(GLOB_RECURSE OPJ_DATA_NR_LIST
      "${INPUT_NR}/*.j2c"
      "${INPUT_NR}/*.jp2"
      "${INPUT_NR}/*.jpc"
-        "${INPUT_NR}/*.jph"
-        "${INPUT_NR}/*.jhc"
+     "${INPUT_NR}/*.jph"
+     "${INPUT_NR}/*.jhc"
      #"${INPUT_NR}/*.jpx"
      )
 
@@ -113,7 +113,10 @@ foreach(INPUT_FILENAME ${OPJ_DATA_NR_LIST})
   	       -o ${TEMP}/${INPUT_FILENAME_NAME}.txt
   	       -v
   	       )
-  	
+
+  set_tests_properties(NR-${INPUT_FILENAME_NAME}-dump
+                       PROPERTIES ENVIRONMENT OJP_DO_NOT_DISPLAY_TILE_INDEX_IF_TLM=YES)
+
   if(bad_jpeg2000)
     set_tests_properties(NR-${INPUT_FILENAME_NAME}-dump
                          PROPERTIES WILL_FAIL TRUE)
@@ -336,6 +339,10 @@ foreach(OPJ_TEST_CMD_LINE ${OPJ_TEST_CMD_LINE_LIST})
             -i ${OUTPUT_FILENAME}
             -o ${OUTPUT_FILENAME}-ENC-${IT_TEST_ENC}.txt
           )
+
+          set_tests_properties(NR-ENC-${INPUT_FILENAME_NAME}-${IT_TEST_ENC}-dump
+                               PROPERTIES ENVIRONMENT OJP_DO_NOT_DISPLAY_TILE_INDEX_IF_TLM=YES)
+
           set_tests_properties(NR-ENC-${INPUT_FILENAME_NAME}-${IT_TEST_ENC}-dump
                                PROPERTIES DEPENDS
                                NR-ENC-${INPUT_FILENAME_NAME}-${IT_TEST_ENC}-encode)

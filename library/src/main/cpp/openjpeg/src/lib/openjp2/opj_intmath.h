@@ -177,10 +177,11 @@ static INLINE OPJ_UINT32  opj_uint_ceildiv(OPJ_UINT32  a, OPJ_UINT32  b)
 Divide an integer and round upwards
 @return Returns a divided by b
 */
-static INLINE OPJ_UINT32 opj_uint64_ceildiv_res_uint32(OPJ_UINT64 a,
-                                                       OPJ_UINT64 b) {
+static INLINE OPJ_UINT32  opj_uint64_ceildiv_res_uint32(OPJ_UINT64 a,
+        OPJ_UINT64 b)
+{
     assert(b);
-    return (OPJ_UINT32) ((a + b - 1) / b);
+    return (OPJ_UINT32)((a + b - 1) / b);
 }
 
 /**
@@ -293,14 +294,15 @@ Assumes complement-to-two signed integers.
 @param b
 @return Returns a + b
 */
-static INLINE OPJ_INT32 opj_int_add_no_overflow(OPJ_INT32 a, OPJ_INT32 b) {
-    void *pa = &a;
-    void *pb = &b;
-    OPJ_UINT32 *upa = (OPJ_UINT32 *) pa;
-    OPJ_UINT32 *upb = (OPJ_UINT32 *) pb;
+static INLINE OPJ_INT32 opj_int_add_no_overflow(OPJ_INT32 a, OPJ_INT32 b)
+{
+    void* pa = &a;
+    void* pb = &b;
+    OPJ_UINT32* upa = (OPJ_UINT32*)pa;
+    OPJ_UINT32* upb = (OPJ_UINT32*)pb;
     OPJ_UINT32 ures = *upa + *upb;
-    void *pures = &ures;
-    OPJ_INT32 *ipres = (OPJ_INT32 *) pures;
+    void* pures = &ures;
+    OPJ_INT32* ipres = (OPJ_INT32*)pures;
     return *ipres;
 }
 
@@ -311,14 +313,15 @@ Assumes complement-to-two signed integers.
 @param b
 @return Returns a - b
 */
-static INLINE OPJ_INT32 opj_int_sub_no_overflow(OPJ_INT32 a, OPJ_INT32 b) {
-    void *pa = &a;
-    void *pb = &b;
-    OPJ_UINT32 *upa = (OPJ_UINT32 *) pa;
-    OPJ_UINT32 *upb = (OPJ_UINT32 *) pb;
+static INLINE OPJ_INT32 opj_int_sub_no_overflow(OPJ_INT32 a, OPJ_INT32 b)
+{
+    void* pa = &a;
+    void* pb = &b;
+    OPJ_UINT32* upa = (OPJ_UINT32*)pa;
+    OPJ_UINT32* upb = (OPJ_UINT32*)pb;
     OPJ_UINT32 ures = *upa - *upb;
-    void *pures = &ures;
-    OPJ_INT32 *ipres = (OPJ_INT32 *) pures;
+    void* pures = &ures;
+    OPJ_INT32* ipres = (OPJ_INT32*)pures;
     return *ipres;
 }
 

@@ -89,16 +89,16 @@ OPJ_BOOL OPJ_CALLCONV opj_set_error_handler(opj_codec_t * p_codec,
 /* ---------------------------------------------------------------------- */
 
 static OPJ_SIZE_T opj_read_from_file(void * p_buffer, OPJ_SIZE_T p_nb_bytes,
-                                     void *p_user_data)
+                                     void * p_user_data)
 {
-    FILE *p_file = (FILE *) p_user_data;
-    OPJ_SIZE_T l_nb_read = fread(p_buffer, 1, p_nb_bytes, (FILE *) p_file);
+    FILE* p_file = (FILE*)p_user_data;
+    OPJ_SIZE_T l_nb_read = fread(p_buffer, 1, p_nb_bytes, (FILE*)p_file);
     return l_nb_read ? l_nb_read : (OPJ_SIZE_T) - 1;
 }
 
-static OPJ_UINT64 opj_get_data_length_from_file(void *p_user_data)
+static OPJ_UINT64 opj_get_data_length_from_file(void * p_user_data)
 {
-    FILE *p_file = (FILE *) p_user_data;
+    FILE* p_file = (FILE*)p_user_data;
     OPJ_OFF_T file_length = 0;
 
     OPJ_FSEEK(p_file, 0, SEEK_END);
@@ -109,15 +109,15 @@ static OPJ_UINT64 opj_get_data_length_from_file(void *p_user_data)
 }
 
 static OPJ_SIZE_T opj_write_from_file(void * p_buffer, OPJ_SIZE_T p_nb_bytes,
-                                      void *p_user_data)
+                                      void * p_user_data)
 {
-    FILE *p_file = (FILE *) p_user_data;
+    FILE* p_file = (FILE*)p_user_data;
     return fwrite(p_buffer, 1, p_nb_bytes, p_file);
 }
 
-static OPJ_OFF_T opj_skip_from_file(OPJ_OFF_T p_nb_bytes, void *p_user_data)
+static OPJ_OFF_T opj_skip_from_file(OPJ_OFF_T p_nb_bytes, void * p_user_data)
 {
-    FILE *p_file = (FILE *) p_user_data;
+    FILE* p_file = (FILE*)p_user_data;
     if (OPJ_FSEEK(p_file, p_nb_bytes, SEEK_CUR)) {
         return -1;
     }
@@ -125,9 +125,9 @@ static OPJ_OFF_T opj_skip_from_file(OPJ_OFF_T p_nb_bytes, void *p_user_data)
     return p_nb_bytes;
 }
 
-static OPJ_BOOL opj_seek_from_file(OPJ_OFF_T p_nb_bytes, void *p_user_data)
+static OPJ_BOOL opj_seek_from_file(OPJ_OFF_T p_nb_bytes, void * p_user_data)
 {
-    FILE *p_file = (FILE *) p_user_data;
+    FILE* p_file = (FILE*)p_user_data;
     if (OPJ_FSEEK(p_file, p_nb_bytes, SEEK_SET)) {
         return OPJ_FALSE;
     }
@@ -135,8 +135,9 @@ static OPJ_BOOL opj_seek_from_file(OPJ_OFF_T p_nb_bytes, void *p_user_data)
     return OPJ_TRUE;
 }
 
-static void opj_close_from_file(void *p_user_data) {
-    FILE *p_file = (FILE *) p_user_data;
+static void opj_close_from_file(void* p_user_data)
+{
+    FILE* p_file = (FILE*)p_user_data;
     fclose(p_file);
 }
 
@@ -223,8 +224,8 @@ opj_codec_t* OPJ_CALLCONV opj_create_decompress(OPJ_CODEC_FORMAT p_format)
         l_codec->m_codec_data.m_decompression.opj_setup_decoder =
             (void (*)(void *, opj_dparameters_t *)) opj_j2k_setup_decoder;
 
-            l_codec->m_codec_data.m_decompression.opj_decoder_set_strict_mode =
-                    (void (*)(void *, OPJ_BOOL)) opj_j2k_decoder_set_strict_mode;
+        l_codec->m_codec_data.m_decompression.opj_decoder_set_strict_mode =
+            (void (*)(void *, OPJ_BOOL)) opj_j2k_decoder_set_strict_mode;
 
 
         l_codec->m_codec_data.m_decompression.opj_read_tile_header =
@@ -334,8 +335,8 @@ opj_codec_t* OPJ_CALLCONV opj_create_decompress(OPJ_CODEC_FORMAT p_format)
         l_codec->m_codec_data.m_decompression.opj_setup_decoder =
             (void (*)(void *, opj_dparameters_t *)) opj_jp2_setup_decoder;
 
-            l_codec->m_codec_data.m_decompression.opj_decoder_set_strict_mode =
-                    (void (*)(void *, OPJ_BOOL)) opj_jp2_decoder_set_strict_mode;
+        l_codec->m_codec_data.m_decompression.opj_decoder_set_strict_mode =
+            (void (*)(void *, OPJ_BOOL)) opj_jp2_decoder_set_strict_mode;
 
         l_codec->m_codec_data.m_decompression.opj_set_decode_area =
             (OPJ_BOOL(*)(void *,
@@ -438,19 +439,20 @@ OPJ_BOOL OPJ_CALLCONV opj_setup_decoder(opj_codec_t *p_codec,
 }
 
 OPJ_BOOL OPJ_CALLCONV opj_decoder_set_strict_mode(opj_codec_t *p_codec,
-                                                  OPJ_BOOL strict) {
+        OPJ_BOOL strict)
+{
     if (p_codec) {
-        opj_codec_private_t *l_codec = (opj_codec_private_t *) p_codec;
+        opj_codec_private_t * l_codec = (opj_codec_private_t *) p_codec;
 
-        if (!l_codec->is_decompressor) {
+        if (! l_codec->is_decompressor) {
             opj_event_msg(&(l_codec->m_event_mgr), EVT_ERROR,
                           "Codec provided to the opj_decoder_set_strict_mode function is not a decompressor handler.\n");
             return OPJ_FALSE;
         }
 
         l_codec->m_codec_data.m_decompression.opj_decoder_set_strict_mode(
-                l_codec->m_codec,
-                strict);
+            l_codec->m_codec,
+            strict);
         return OPJ_TRUE;
     }
     return OPJ_FALSE;

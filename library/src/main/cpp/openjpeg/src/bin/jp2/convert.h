@@ -95,7 +95,7 @@ opj_image_t* bmptoimage(const char *filename, opj_cparameters_t *parameters);
 int imagetobmp(opj_image_t *image, const char *outfile);
 
 /* TIFF conversion*/
-opj_image_t *tiftoimage(const char *filename, opj_cparameters_t *parameters,
+opj_image_t* tiftoimage(const char *filename, opj_cparameters_t *parameters,
                         const unsigned int target_bitdepth);
 int imagetotif(opj_image_t *image, const char *outfile);
 /**

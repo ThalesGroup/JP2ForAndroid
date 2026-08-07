@@ -86,7 +86,6 @@ typedef struct img_folder {
 static unsigned int get_num_images(char *imgdirpath);
 static int load_images(dircnt_t *dirptr, char *imgdirpath);
 static int get_file_format(const char *filename);
-
 static char get_next_file(unsigned int imageno, dircnt_t *dirptr,
                           img_fol_t *img_fol,
                           opj_dparameters_t *parameters);
@@ -187,23 +186,23 @@ static int load_images(dircnt_t *dirptr, char *imgdirpath)
 static int get_file_format(const char *filename)
 {
     unsigned int i;
-    static const char *const extension[] = {
-            "pgx", "pnm", "pgm", "ppm", "bmp",
-            "tif", "tiff",
-            "raw", "yuv", "rawl",
-            "tga", "png",
-            "j2k", "jp2", "jpt", "j2c", "jpc",
-            "jph", /* HTJ2K with JP2 boxes */
-            "jhc" /* HTJ2K codestream */
+    static const char * const extension[] = {
+        "pgx", "pnm", "pgm", "ppm", "bmp",
+        "tif", "tiff",
+        "raw", "yuv", "rawl",
+        "tga", "png",
+        "j2k", "jp2", "jpt", "j2c", "jpc",
+        "jph", /* HTJ2K with JP2 boxes */
+        "jhc" /* HTJ2K codestream */
     };
     static const int format[] = {
-            PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT,
-            TIF_DFMT, TIF_DFMT,
-            RAW_DFMT, RAW_DFMT, RAWL_DFMT,
-            TGA_DFMT, PNG_DFMT,
-            J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT,
-            JP2_CFMT, /* HTJ2K with JP2 boxes */
-            J2K_CFMT /* HTJ2K codestream */
+        PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT,
+        TIF_DFMT, TIF_DFMT,
+        RAW_DFMT, RAW_DFMT, RAWL_DFMT,
+        TGA_DFMT, PNG_DFMT,
+        J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT,
+        JP2_CFMT, /* HTJ2K with JP2 boxes */
+        J2K_CFMT /* HTJ2K codestream */
     };
     const char *ext = strrchr(filename, '.');
     if (ext == NULL) {
@@ -237,7 +236,7 @@ static char get_next_file(unsigned int imageno, dircnt_t *dirptr,
         return 1;
     }
     if (strlen(img_fol->imgdirpath) + 1 + strlen(
-            image_filename) + 1 > sizeof(infilename)) {
+                image_filename) + 1 > sizeof(infilename)) {
         return 1;
     }
     strcpy(infilename, img_fol->imgdirpath);
@@ -256,7 +255,7 @@ static char get_next_file(unsigned int imageno, dircnt_t *dirptr,
     }
     if (img_fol->set_out_format == 1) {
         if (strlen(img_fol->imgdirpath) + 1 + strlen(temp_ofname) + 1 + strlen(
-                img_fol->out_format) + 1 > sizeof(outfilename)) {
+                    img_fol->out_format) + 1 > sizeof(outfilename)) {
             return 1;
         }
         strcpy(outfilename, img_fol->imgdirpath);
@@ -433,7 +432,7 @@ static int parse_cmdline_decoder(int argc, char **argv,
             fprintf(stderr,
                     "[ERROR] When -ImgDir is used, -OutFor <FORMAT> must be used.\n");
             fprintf(stderr, "Only one format allowed.\n"
-                            "Valid format are PGM, PPM, PNM, PGX, BMP, TIF, TIFF, RAW, YUV and TGA.\n");
+                    "Valid format are PGM, PPM, PNM, PGX, BMP, TIF, TIFF, RAW, YUV and TGA.\n");
             return 1;
         }
         if (!(parameters->outfile[0] == 0)) {
@@ -528,21 +527,21 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
         /* Stores at max 10 image file names*/
-        dirptr->filename_buf = (char *) calloc((size_t) num_images,
-                                               OPJ_PATH_LEN * sizeof(char));
+        dirptr->filename_buf = (char*) calloc((size_t) num_images,
+                                              OPJ_PATH_LEN * sizeof(char));
         if (!dirptr->filename_buf) {
             free(dirptr);
             return EXIT_FAILURE;
         }
-        dirptr->filename = (char **) calloc((size_t) num_images, sizeof(char *));
+        dirptr->filename = (char**) calloc((size_t) num_images, sizeof(char*));
 
         if (!dirptr->filename) {
             goto fails;
         }
 
         for (it_image = 0; it_image < num_images; it_image++) {
-            dirptr->filename[it_image] = dirptr->filename_buf + (size_t) it_image *
-                                                                OPJ_PATH_LEN;
+            dirptr->filename[it_image] = dirptr->filename_buf + (size_t)it_image *
+                                         OPJ_PATH_LEN;
         }
 
         if (load_images(dirptr, img_fol.imgdirpath) == 1) {

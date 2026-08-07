@@ -36,31 +36,35 @@
 
 #include "openjpeg.h"
 
-extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv);
+extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv);
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len);
 
 typedef struct {
-    const uint8_t *pabyData;
-    size_t nCurPos;
-    size_t nLength;
+    const uint8_t* pabyData;
+    size_t         nCurPos;
+    size_t         nLength;
 } MemFile;
 
 
-static void ErrorCallback(const char *msg, void *) {
-    (void) msg;
+static void ErrorCallback(const char * msg, void *)
+{
+    (void)msg;
     //fprintf(stderr, "%s\n", msg);
 }
 
 
-static void WarningCallback(const char *, void *) {
+static void WarningCallback(const char *, void *)
+{
 }
 
-static void InfoCallback(const char *, void *) {
+static void InfoCallback(const char *, void *)
+{
 }
 
-static OPJ_SIZE_T ReadCallback(void *pBuffer, OPJ_SIZE_T nBytes,
-                               void *pUserData) {
-    MemFile *memFile = (MemFile *) pUserData;
+static OPJ_SIZE_T ReadCallback(void* pBuffer, OPJ_SIZE_T nBytes,
+                               void *pUserData)
+{
+    MemFile* memFile = (MemFile*)pUserData;
     //printf("want to read %d bytes at %d\n", (int)memFile->nCurPos, (int)nBytes);
     if (memFile->nCurPos >= memFile->nLength) {
         return -1;
@@ -79,28 +83,32 @@ static OPJ_SIZE_T ReadCallback(void *pBuffer, OPJ_SIZE_T nBytes,
     return nBytes;
 }
 
-static OPJ_BOOL SeekCallback(OPJ_OFF_T nBytes, void *pUserData) {
-    MemFile *memFile = (MemFile *) pUserData;
+static OPJ_BOOL SeekCallback(OPJ_OFF_T nBytes, void * pUserData)
+{
+    MemFile* memFile = (MemFile*)pUserData;
     //printf("seek to %d\n", (int)nBytes);
     memFile->nCurPos = nBytes;
     return OPJ_TRUE;
 }
 
-static OPJ_OFF_T SkipCallback(OPJ_OFF_T nBytes, void *pUserData) {
-    MemFile *memFile = (MemFile *) pUserData;
+static OPJ_OFF_T SkipCallback(OPJ_OFF_T nBytes, void * pUserData)
+{
+    MemFile* memFile = (MemFile*)pUserData;
     memFile->nCurPos += nBytes;
     return nBytes;
 }
 
 
-int LLVMFuzzerInitialize(int * /*argc*/, char ***argv) {
+int LLVMFuzzerInitialize(int* /*argc*/, char*** argv)
+{
     return 0;
 }
 
 static const unsigned char jpc_header[] = {0xff, 0x4f};
 static const unsigned char jp2_box_jp[] = {0x6a, 0x50, 0x20, 0x20}; /* 'jP  ' */
 
-int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) {
+int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
+{
 
     OPJ_CODEC_FORMAT eCodecFormat;
     if (len >= sizeof(jpc_header) &&
@@ -110,7 +118,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) {
         return 0;
     }
 
-    opj_codec_t *pCodec = opj_create_decompress(eCodecFormat);
+    opj_codec_t* pCodec = opj_create_decompress(eCodecFormat);
     opj_set_info_handler(pCodec, InfoCallback, NULL);
     opj_set_warning_handler(pCodec, WarningCallback, NULL);
     opj_set_error_handler(pCodec, ErrorCallback, NULL);
@@ -131,7 +139,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) {
     opj_stream_set_skip_function(pStream, SkipCallback);
     opj_stream_set_user_data(pStream, &memFile, NULL);
 
-    opj_image_t *psImage = NULL;
+    opj_image_t * psImage = NULL;
     if (!opj_read_header(pStream, pCodec, &psImage)) {
         opj_destroy_codec(pCodec);
         opj_stream_destroy(pStream);

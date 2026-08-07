@@ -334,14 +334,14 @@ static OPJ_BOOL opj_jp2_read_colr(opj_jp2_t *jp2,
  * Developers wanting to extend the library can add their own writing procedures.
  */
 static OPJ_BOOL opj_jp2_setup_end_header_writing(opj_jp2_t *jp2,
-                                                 opj_event_mgr_t *p_manager);
+        opj_event_mgr_t * p_manager);
 
 /**
  * Sets up the procedures to do on reading header after the codestream.
  * Developers wanting to extend the library can add their own writing procedures.
  */
 static OPJ_BOOL opj_jp2_setup_end_header_reading(opj_jp2_t *jp2,
-                                                 opj_event_mgr_t *p_manager);
+        opj_event_mgr_t * p_manager);
 
 /**
  * Reads a jpeg2000 file header structure.
@@ -391,7 +391,7 @@ static OPJ_BOOL opj_jp2_read_boxhdr(opj_jp2_box_t *box,
  * are valid. Developers wanting to extend the library can add their own validation procedures.
  */
 static OPJ_BOOL opj_jp2_setup_encoding_validation(opj_jp2_t *jp2,
-                                                  opj_event_mgr_t *p_manager);
+        opj_event_mgr_t * p_manager);
 
 /**
  * Sets up the procedures to do on writing header. Developers wanting to extend the library can add their own writing procedures.
@@ -460,7 +460,7 @@ static OPJ_BOOL opj_jp2_read_boxhdr_char(opj_jp2_box_t *box,
  * are valid. Developers wanting to extend the library can add their own validation procedures.
  */
 static OPJ_BOOL opj_jp2_setup_decoding_validation(opj_jp2_t *jp2,
-                                                  opj_event_mgr_t *p_manager);
+        opj_event_mgr_t * p_manager);
 
 /**
  * Sets up the procedures to do on reading header.
@@ -1595,8 +1595,8 @@ static OPJ_BOOL opj_jp2_read_colr(opj_jp2_t *jp2,
 }
 
 static OPJ_BOOL opj_jp2_apply_color_postprocessing(opj_jp2_t *jp2,
-                                                   opj_image_t *p_image,
-                                                   opj_event_mgr_t *p_manager)
+        opj_image_t* p_image,
+        opj_event_mgr_t * p_manager)
 {
     if (jp2->j2k->m_specific_param.m_decoder.m_numcomps_to_decode) {
         /* Bypass all JP2 component transforms */
@@ -1630,14 +1630,15 @@ static OPJ_BOOL opj_jp2_apply_color_postprocessing(opj_jp2_t *jp2,
 
 OPJ_BOOL opj_jp2_decode(opj_jp2_t *jp2,
                         opj_stream_private_t *p_stream,
-                        opj_image_t *p_image,
-                        opj_event_mgr_t *p_manager) {
+                        opj_image_t* p_image,
+                        opj_event_mgr_t * p_manager)
+{
     if (!p_image) {
         return OPJ_FALSE;
     }
 
     /* J2K decoding */
-    if (!opj_j2k_decode(jp2->j2k, p_stream, p_image, p_manager)) {
+    if (! opj_j2k_decode(jp2->j2k, p_stream, p_image, p_manager)) {
         opj_event_msg(p_manager, EVT_ERROR,
                       "Failed to decode the codestream in the JP2 file\n");
         return OPJ_FALSE;
@@ -1886,7 +1887,8 @@ void opj_jp2_setup_decoder(opj_jp2_t *jp2, opj_dparameters_t *parameters)
                                  OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG;
 }
 
-void opj_jp2_decoder_set_strict_mode(opj_jp2_t *jp2, OPJ_BOOL strict) {
+void opj_jp2_decoder_set_strict_mode(opj_jp2_t *jp2, OPJ_BOOL strict)
+{
     opj_j2k_decoder_set_strict_mode(jp2->j2k, strict);
 }
 
@@ -1985,14 +1987,24 @@ OPJ_BOOL opj_jp2_setup_encoder(opj_jp2_t *jp2,
     if (image->icc_profile_len) {
         jp2->meth = 2;
         jp2->enumcs = 0;
+        jp2->color.icc_profile_buf = (OPJ_BYTE *)opj_malloc(image->icc_profile_len);
+        if (jp2->color.icc_profile_buf) {
+            jp2->color.icc_profile_len = image->icc_profile_len;
+            memcpy(jp2->color.icc_profile_buf, image->icc_profile_buf,
+                   image->icc_profile_len);
+        }
     } else {
         jp2->meth = 1;
-        if (image->color_space == 1) {
+        if (image->color_space == OPJ_CLRSPC_SRGB) {
             jp2->enumcs = 16;    /* sRGB as defined by IEC 61966-2-1 */
-        } else if (image->color_space == 2) {
-            jp2->enumcs = 17;    /* greyscale */
-        } else if (image->color_space == 3) {
+        } else if (image->color_space == OPJ_CLRSPC_GRAY) {
+            jp2->enumcs = 17;
+        } else if (image->color_space == OPJ_CLRSPC_SYCC) {
             jp2->enumcs = 18;    /* YUV */
+        } else if (image->color_space == OPJ_CLRSPC_EYCC) {
+            jp2->enumcs = 24;
+        } else if (image->color_space == OPJ_CLRSPC_CMYK) {
+            jp2->enumcs = 12;
         }
     }
 
@@ -2867,7 +2879,7 @@ OPJ_BOOL opj_jp2_read_header(opj_stream_private_t *p_stream,
                               p_image,
                               p_manager);
 
-    if (p_image && *p_image) {
+    if (ret && p_image && *p_image) {
         /* Set Image Color Space */
         if (jp2->enumcs == 16) {
             (*p_image)->color_space = OPJ_CLRSPC_SRGB;

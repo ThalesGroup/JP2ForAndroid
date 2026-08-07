@@ -146,10 +146,11 @@ void opj_bio_init_dec(opj_bio_t *bio, OPJ_BYTE *bp, OPJ_UINT32 len)
     bio->ct = 0;
 }
 
-void opj_bio_putbit(opj_bio_t *bio, OPJ_UINT32 b) {
+void opj_bio_putbit(opj_bio_t *bio, OPJ_UINT32 b)
+{
     if (bio->ct == 0) {
         opj_bio_byteout(
-                bio); /* MSD: why not check the return value of this function ? */
+            bio); /* MSD: why not check the return value of this function ? */
     }
     bio->ct--;
     bio->buf |= b << bio->ct;

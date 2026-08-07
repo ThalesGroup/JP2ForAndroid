@@ -65,13 +65,13 @@ static void convert_16u32s_C1R(const OPJ_BYTE* pSrc, OPJ_INT32* pDst,
     }
 }
 
-static opj_image_t *pngtoimage_internal(opj_cparameters_t *params,
-                                        FILE *reader,
-                                        png_structp png,
-                                        png_infop info,
-                                        png_uint_32 *pheight,
-                                        OPJ_BYTE ***prows,
-                                        OPJ_INT32 **prow32s)
+static opj_image_t * pngtoimage_internal(opj_cparameters_t * params,
+        FILE *reader,
+        png_structp  png,
+        png_infop    info,
+        png_uint_32* pheight,
+        OPJ_BYTE*** prows,
+        OPJ_INT32** prow32s)
 {
     *pheight = 0;
     *prows = NULL;
@@ -87,14 +87,14 @@ static opj_image_t *pngtoimage_internal(opj_cparameters_t *params,
         OPJ_UINT32 nr_comp;
         convert_XXx32s_C1R cvtXXTo32s = NULL;
         convert_32s_CXPX cvtCxToPx = NULL;
-        OPJ_INT32 *planes[4];
+        OPJ_INT32* planes[4];
         double gamma;
         int bit_depth, interlace_type, compression_type, filter_type;
         OPJ_UINT32 i;
-        png_uint_32 width, height = 0U;
+        png_uint_32  width, height = 0U;
         int color_type;
-        OPJ_BYTE **rows = NULL;
-        OPJ_INT32 *row32s = NULL;
+        OPJ_BYTE** rows = NULL;
+        OPJ_INT32* row32s = NULL;
 
         png_init_io(png, reader);
         png_set_sig_bytes(png, MAGIC_SIZE);
@@ -141,48 +141,48 @@ static opj_image_t *pngtoimage_internal(opj_cparameters_t *params,
         color_type = png_get_color_type(png, info);
 
         switch (color_type) {
-            case PNG_COLOR_TYPE_GRAY:
-                nr_comp = 1;
-                break;
-            case PNG_COLOR_TYPE_GRAY_ALPHA:
-                nr_comp = 2;
-                break;
-            case PNG_COLOR_TYPE_RGB:
-                nr_comp = 3;
-                break;
-            case PNG_COLOR_TYPE_RGB_ALPHA:
-                nr_comp = 4;
-                break;
-            default:
-                fprintf(stderr, "pngtoimage: colortype %d is not supported\n", color_type);
-                return image;
+        case PNG_COLOR_TYPE_GRAY:
+            nr_comp = 1;
+            break;
+        case PNG_COLOR_TYPE_GRAY_ALPHA:
+            nr_comp = 2;
+            break;
+        case PNG_COLOR_TYPE_RGB:
+            nr_comp = 3;
+            break;
+        case PNG_COLOR_TYPE_RGB_ALPHA:
+            nr_comp = 4;
+            break;
+        default:
+            fprintf(stderr, "pngtoimage: colortype %d is not supported\n", color_type);
+            return image;
         }
         cvtCxToPx = convert_32s_CXPX_LUT[nr_comp];
         bit_depth = png_get_bit_depth(png, info);
 
         switch (bit_depth) {
-            case 1:
-            case 2:
-            case 4:
-            case 8:
-                cvtXXTo32s = convert_XXu32s_C1R_LUT[bit_depth];
-                break;
-            case 16: /* 16 bpp is specific to PNG */
-                cvtXXTo32s = convert_16u32s_C1R;
-                break;
-            default:
-                fprintf(stderr, "pngtoimage: bit depth %d is not supported\n", bit_depth);
-                return image;
+        case 1:
+        case 2:
+        case 4:
+        case 8:
+            cvtXXTo32s = convert_XXu32s_C1R_LUT[bit_depth];
+            break;
+        case 16: /* 16 bpp is specific to PNG */
+            cvtXXTo32s = convert_16u32s_C1R;
+            break;
+        default:
+            fprintf(stderr, "pngtoimage: bit depth %d is not supported\n", bit_depth);
+            return image;
         }
 
-        rows = (OPJ_BYTE **) calloc(height + 1, sizeof(OPJ_BYTE *));
+        rows = (OPJ_BYTE**)calloc(height + 1, sizeof(OPJ_BYTE*));
         if (rows == NULL) {
             fprintf(stderr, "pngtoimage: memory out\n");
             return image;
         }
         *prows = rows;
         for (i = 0; i < height; ++i) {
-            rows[i] = (OPJ_BYTE *) malloc(png_get_rowbytes(png, info));
+            rows[i] = (OPJ_BYTE*)malloc(png_get_rowbytes(png, info));
             if (rows[i] == NULL) {
                 fprintf(stderr, "pngtoimage: memory out\n");
                 return image;
@@ -194,12 +194,12 @@ static opj_image_t *pngtoimage_internal(opj_cparameters_t *params,
         memset(cmptparm, 0, sizeof(cmptparm));
         for (i = 0; i < nr_comp; ++i) {
             /* bits_per_pixel: 8 or 16 */
-            cmptparm[i].prec = (OPJ_UINT32) bit_depth;
+            cmptparm[i].prec = (OPJ_UINT32)bit_depth;
             cmptparm[i].sgnd = 0;
-            cmptparm[i].dx = (OPJ_UINT32) params->subsampling_dx;
-            cmptparm[i].dy = (OPJ_UINT32) params->subsampling_dy;
-            cmptparm[i].w = (OPJ_UINT32) width;
-            cmptparm[i].h = (OPJ_UINT32) height;
+            cmptparm[i].dx = (OPJ_UINT32)params->subsampling_dx;
+            cmptparm[i].dy = (OPJ_UINT32)params->subsampling_dy;
+            cmptparm[i].w = (OPJ_UINT32)width;
+            cmptparm[i].h = (OPJ_UINT32)height;
         }
 
         image = opj_image_create(nr_comp, &cmptparm[0],
@@ -207,14 +207,14 @@ static opj_image_t *pngtoimage_internal(opj_cparameters_t *params,
         if (image == NULL) {
             return image;
         }
-        image->x0 = (OPJ_UINT32) params->image_offset_x0;
-        image->y0 = (OPJ_UINT32) params->image_offset_y0;
-        image->x1 = (OPJ_UINT32) (image->x0 + (width - 1) * (OPJ_UINT32)
-                params->subsampling_dx + 1);
-        image->y1 = (OPJ_UINT32) (image->y0 + (height - 1) * (OPJ_UINT32)
-                params->subsampling_dy + 1);
+        image->x0 = (OPJ_UINT32)params->image_offset_x0;
+        image->y0 = (OPJ_UINT32)params->image_offset_y0;
+        image->x1 = (OPJ_UINT32)(image->x0 + (width  - 1) * (OPJ_UINT32)
+                                 params->subsampling_dx + 1);
+        image->y1 = (OPJ_UINT32)(image->y0 + (height - 1) * (OPJ_UINT32)
+                                 params->subsampling_dy + 1);
 
-        row32s = (OPJ_INT32 *) malloc((size_t) width * nr_comp * sizeof(OPJ_INT32));
+        row32s = (OPJ_INT32 *)malloc((size_t)width * nr_comp * sizeof(OPJ_INT32));
         if (row32s == NULL) {
             return image;
         }
@@ -228,7 +228,7 @@ static opj_image_t *pngtoimage_internal(opj_cparameters_t *params,
         }
 
         for (i = 0; i < height; ++i) {
-            cvtXXTo32s(rows[i], row32s, (OPJ_SIZE_T) width * nr_comp);
+            cvtXXTo32s(rows[i], row32s, (OPJ_SIZE_T)width * nr_comp);
             cvtCxToPx(row32s, planes, width);
             planes[0] += width;
             planes[1] += width;
@@ -240,14 +240,15 @@ static opj_image_t *pngtoimage_internal(opj_cparameters_t *params,
     }
 }
 
-opj_image_t *pngtoimage(const char *read_idf, opj_cparameters_t *params) {
-    png_structp png = NULL;
-    png_infop info = NULL;
+opj_image_t *pngtoimage(const char *read_idf, opj_cparameters_t * params)
+{
+    png_structp  png = NULL;
+    png_infop    info = NULL;
     OPJ_UINT32 i;
-    png_uint_32 height = 0U;
+    png_uint_32  height = 0U;
     FILE *reader = NULL;
-    OPJ_BYTE **rows = NULL;
-    OPJ_INT32 *row32s = NULL;
+    OPJ_BYTE** rows = NULL;
+    OPJ_INT32* row32s = NULL;
     OPJ_BYTE sigbuf[8];
     opj_image_t *image = NULL;
 
@@ -257,7 +258,7 @@ opj_image_t *pngtoimage(const char *read_idf, opj_cparameters_t *params) {
     }
 
     if (fread(sigbuf, 1, MAGIC_SIZE, reader) != MAGIC_SIZE
-        || memcmp(sigbuf, PNG_MAGIC, MAGIC_SIZE) != 0) {
+            || memcmp(sigbuf, PNG_MAGIC, MAGIC_SIZE) != 0) {
         fprintf(stderr, "pngtoimage: %s is no valid PNG file\n", read_idf);
         goto fin;
     }

@@ -375,9 +375,9 @@ bool OPJViewerApp::OnInit(void)
 
     // Create the main frame window
     OPJFrame *frame = new OPJFrame(NULL, wxID_ANY, OPJ_APPLICATION_TITLEBAR,
-            wxDefaultPosition, wxSize(wxGetApp().m_framewidth, wxGetApp().m_frameheight),
-            wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE |
-            wxHSCROLL | wxVSCROLL);
+                                   wxDefaultPosition, wxSize(wxGetApp().m_framewidth, wxGetApp().m_frameheight),
+                                   wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE |
+                                   wxHSCROLL | wxVSCROLL);
 
     // Give it an icon (this is ignored in MDI mode: uses resources)
 #ifdef __WXMSW__
@@ -524,17 +524,16 @@ BEGIN_EVENT_TABLE(OPJFrame, wxMDIParentFrame)
     EVT_MENU(OPJFRAME_FILETOGGLET, OPJFrame::OnToggleToolbar)
     EVT_MENU(OPJFRAME_SETSENCO, OPJFrame::OnSetsEnco)
     EVT_MENU(OPJFRAME_SETSDECO, OPJFrame::OnSetsDeco)
-EVT_SASH_DRAGGED_RANGE(OPJFRAME_BROWSEWIN, OPJFRAME_LOGWIN,
-        OPJFrame::OnSashDrag
-)
+    EVT_SASH_DRAGGED_RANGE(OPJFRAME_BROWSEWIN, OPJFRAME_LOGWIN,
+                           OPJFrame::OnSashDrag)
     EVT_NOTEBOOK_PAGE_CHANGED(LEFT_NOTEBOOK_ID, OPJFrame::OnNotebook)
     EVT_MENU(OPJFRAME_THREADLOGMSG, OPJFrame::OnThreadLogmsg)
 END_EVENT_TABLE()
 
 // this is the frame constructor
 OPJFrame::OPJFrame(wxWindow *parent, const wxWindowID id, const wxString& title,
-                   const wxPoint &pos, const wxSize &size, const long style)
-        : wxMDIParentFrame(parent, id, title, pos, size, style)
+                   const wxPoint& pos, const wxSize& size, const long style)
+    : wxMDIParentFrame(parent, id, title, pos, size, style)
 {
     // file menu and its items
     wxMenu *file_menu = new wxMenu;
@@ -662,44 +661,44 @@ OPJFrame::OPJFrame(wxWindow *parent, const wxWindowID id, const wxString& title,
                              wxDefaultPosition, wxDefaultSize,
                              wxTB_HORIZONTAL | wxNO_BORDER);
     wxBitmap bmpOpen = wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_TOOLBAR,
-                                                wxDefaultSize);
+                       wxDefaultSize);
     wxBitmap bmpSaveAs = wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS, wxART_TOOLBAR,
-                                                  wxDefaultSize);
+                         wxDefaultSize);
     wxBitmap bmpZoom = wxArtProvider::GetBitmap(wxART_FIND, wxART_TOOLBAR,
-                                                wxDefaultSize);
+                       wxDefaultSize);
     wxBitmap bmpFit = wxArtProvider::GetBitmap(wxART_FIND_AND_REPLACE,
-                                               wxART_TOOLBAR,
-                                               wxDefaultSize);
+                      wxART_TOOLBAR,
+                      wxDefaultSize);
     wxBitmap bmpReload = wxArtProvider::GetBitmap(wxART_EXECUTABLE_FILE,
-                                                  wxART_TOOLBAR,
-                                                  wxDefaultSize);
+                         wxART_TOOLBAR,
+                         wxDefaultSize);
     wxBitmap bmpDecosettings = wxArtProvider::GetBitmap(wxART_REPORT_VIEW,
-                                                        wxART_TOOLBAR,
-                                                        wxDefaultSize);
+                               wxART_TOOLBAR,
+                               wxDefaultSize);
     wxBitmap bmpEncosettings = wxArtProvider::GetBitmap(wxART_LIST_VIEW,
-                                                        wxART_TOOLBAR,
-                                                        wxDefaultSize);
+                               wxART_TOOLBAR,
+                               wxDefaultSize);
     wxBitmap bmpPrevframe = wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR,
-                                                     wxDefaultSize);
+                            wxDefaultSize);
     wxBitmap bmpHomeframe = wxArtProvider::GetBitmap(wxART_GO_HOME, wxART_TOOLBAR,
-                                                     wxDefaultSize);
+                            wxDefaultSize);
     wxBitmap bmpNextframe = wxArtProvider::GetBitmap(wxART_GO_FORWARD,
-                                                     wxART_TOOLBAR,
-                                                     wxDefaultSize);
+                            wxART_TOOLBAR,
+                            wxDefaultSize);
     wxBitmap bmpLesslayers = bmpPrevframe;
     wxBitmap bmpAlllayers = wxArtProvider::GetBitmap(wxART_GO_TO_PARENT,
-                                                     wxART_TOOLBAR,
-                                                     wxDefaultSize);
+                            wxART_TOOLBAR,
+                            wxDefaultSize);
     wxBitmap bmpMorelayers = bmpNextframe;
     wxBitmap bmpLessres = bmpPrevframe;
     wxBitmap bmpFullres = wxArtProvider::GetBitmap(wxART_GO_TO_PARENT,
-                                                   wxART_TOOLBAR,
-                                                   wxDefaultSize);
+                          wxART_TOOLBAR,
+                          wxDefaultSize);
     wxBitmap bmpMoreres = bmpNextframe;
     wxBitmap bmpPrevcomp = bmpPrevframe;
     wxBitmap bmpAllcomps = wxArtProvider::GetBitmap(wxART_GO_TO_PARENT,
-                                                    wxART_TOOLBAR,
-                                                    wxDefaultSize);
+                           wxART_TOOLBAR,
+                           wxDefaultSize);
     wxBitmap bmpNextcomp = bmpNextframe;
 
     tool_bar->AddTool(OPJFRAME_FILEOPEN, bmpOpen, wxT("Open"));
@@ -746,10 +745,9 @@ OPJFrame::OPJFrame(wxWindow *parent, const wxWindowID id, const wxString& title,
 
     // the logging window
     loggingWindow = new wxSashLayoutWindow(this, OPJFRAME_LOGWIN,
-                                           wxDefaultPosition,
-                                           wxSize(400, wxGetApp().m_peekerheight),
+                                           wxDefaultPosition, wxSize(400, wxGetApp().m_peekerheight),
                                            wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN
-    );
+                                          );
     loggingWindow->SetDefaultSize(wxSize(1000, wxGetApp().m_peekerheight));
     loggingWindow->SetOrientation(wxLAYOUT_HORIZONTAL);
     loggingWindow->SetAlignment(wxLAYOUT_BOTTOM);
@@ -772,7 +770,7 @@ OPJFrame::OPJFrame(wxWindow *parent, const wxWindowID id, const wxString& title,
     m_textCtrl = new wxTextCtrl(m_bookCtrlbottom, wxID_ANY, wxT(""),
                                 wxDefaultPosition, wxDefaultSize,
                                 wxTE_MULTILINE | wxSUNKEN_BORDER | wxTE_READONLY
-    );
+                               );
     m_textCtrl->SetValue(_T("Logging window\n"));
 
     // add it to the notebook
@@ -782,11 +780,11 @@ OPJFrame::OPJFrame(wxWindow *parent, const wxWindowID id, const wxString& title,
     m_textCtrlbrowse = new wxTextCtrl(m_bookCtrlbottom, wxID_ANY, wxT(""),
                                       wxDefaultPosition, wxDefaultSize,
                                       wxTE_MULTILINE | wxSUNKEN_BORDER | wxTE_READONLY | wxTE_RICH
-    );
+                                     );
     wxFont *browsefont = new wxFont(wxNORMAL_FONT->GetPointSize(),
                                     wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     m_textCtrlbrowse->SetDefaultStyle(wxTextAttr(wxNullColour, wxNullColour,
-                                                 *browsefont));
+                                      *browsefont));
     m_textCtrlbrowse->AppendText(wxT("Browsing window\n"));
 
     // add it the notebook
@@ -794,10 +792,9 @@ OPJFrame::OPJFrame(wxWindow *parent, const wxWindowID id, const wxString& title,
 
     // the browser window
     markerTreeWindow = new wxSashLayoutWindow(this, OPJFRAME_BROWSEWIN,
-                                              wxDefaultPosition,
-                                              wxSize(wxGetApp().m_browserwidth, 30),
-                                              wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN
-    );
+            wxDefaultPosition, wxSize(wxGetApp().m_browserwidth, 30),
+            wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN
+                                             );
     markerTreeWindow->SetDefaultSize(wxSize(wxGetApp().m_browserwidth, 1000));
     markerTreeWindow->SetOrientation(wxLAYOUT_VERTICAL);
     markerTreeWindow->SetAlignment(wxLAYOUT_LEFT);
@@ -1039,25 +1036,24 @@ void OPJFrame::Rescale(int zooml, OPJChildFrame *currframe)
             int wzooml, hzooml;
             //wxSize clientsize = currframe->m_canvas->GetClientSize();
             wxSize clientsize = currframe->m_frame->GetActiveChild()->GetClientSize();
-            wzooml = (int) floor(100.0 * (double) clientsize.GetWidth() / (double) (
-                    2 * OPJ_CANVAS_BORDER + currframe->m_canvas->m_image100.GetWidth()));
-            hzooml = (int) floor(100.0 * (double) clientsize.GetHeight() / (double) (
-                    2 * OPJ_CANVAS_BORDER + currframe->m_canvas->m_image100.GetHeight()));
+            wzooml = (int) floor(100.0 * (double) clientsize.GetWidth() / (double)(
+                                     2 * OPJ_CANVAS_BORDER + currframe->m_canvas->m_image100.GetWidth()));
+            hzooml = (int) floor(100.0 * (double) clientsize.GetHeight() / (double)(
+                                     2 * OPJ_CANVAS_BORDER + currframe->m_canvas->m_image100.GetHeight()));
             zooml = wxMin(100, wxMin(wzooml, hzooml));
         }
     }
 
     if (zooml != 100)
-        new_image.Rescale((int) ((double) zooml * (double) new_image.GetWidth() / 100.0),
-                          (int) ((double) zooml * (double) new_image.GetHeight() / 100.0),
-                          wxGetApp().m_resizemethod ? wxIMAGE_QUALITY_HIGH
-                                                    : wxIMAGE_QUALITY_NORMAL);
+        new_image.Rescale((int)((double) zooml * (double) new_image.GetWidth() / 100.0),
+                          (int)((double) zooml * (double) new_image.GetHeight() / 100.0),
+                          wxGetApp().m_resizemethod ? wxIMAGE_QUALITY_HIGH : wxIMAGE_QUALITY_NORMAL);
     currframe->m_canvas->m_image = wxBitmap(new_image);
     currframe->m_canvas->SetScrollbars(20,
                                        20,
-                                       (int) (0.5 + (double) new_image.GetWidth() / 20.0),
-                                       (int) (0.5 + (double) new_image.GetHeight() / 20.0)
-    );
+                                       (int)(0.5 + (double) new_image.GetWidth() / 20.0),
+                                       (int)(0.5 + (double) new_image.GetHeight() / 20.0)
+                                      );
 
     currframe->m_canvas->Refresh();
 
@@ -1252,14 +1248,14 @@ void OPJFrame::OnSashDrag(wxSashEvent& event)
     }
 
     switch (event.GetId()) {
-        case OPJFRAME_BROWSEWIN: {
-            markerTreeWindow->SetDefaultSize(wxSize(event.GetDragRect().width, 1000));
-            break;
-        }
-        case OPJFRAME_LOGWIN: {
-            loggingWindow->SetDefaultSize(wxSize(1000, event.GetDragRect().height));
-            break;
-        }
+    case OPJFRAME_BROWSEWIN: {
+        markerTreeWindow->SetDefaultSize(wxSize(event.GetDragRect().width, 1000));
+        break;
+    }
+    case OPJFRAME_LOGWIN: {
+        loggingWindow->SetDefaultSize(wxSize(1000, event.GetDragRect().height));
+        break;
+    }
     }
 
     wxLayoutAlgorithm layout;
@@ -1332,7 +1328,7 @@ void OPJFrame::SaveFile(wxArrayString paths, wxArrayString filenames)
     ((OPJChildFrame *) GetActiveChild())->m_canvas->m_savename = paths[0];
 
     OPJEncoThread *ethread = ((OPJChildFrame *)
-            GetActiveChild())->m_canvas->CreateEncoThread();
+                              GetActiveChild())->m_canvas->CreateEncoThread();
 
     if (ethread->Run() != wxTHREAD_NO_ERROR) {
         wxLogMessage(wxT("Can't start enco thread!"));
@@ -1351,7 +1347,7 @@ void OPJFrame::OpenFiles(wxArrayString paths, wxArrayString filenames)
     for (size_t n = 0; n < count; n++) {
 
         wxString msg, s;
-        s.Printf(_T("File %d: %s (%s)\n"), (int) n, paths[n].c_str(),
+        s.Printf(_T("File %d: %s (%s)\n"), (int)n, paths[n].c_str(),
                  filenames[n].c_str());
 
         msg += s;
@@ -1361,24 +1357,23 @@ void OPJFrame::OpenFiles(wxArrayString paths, wxArrayString filenames)
 
         // Make another frame, containing a canvas
         OPJChildFrame *subframe = new OPJChildFrame(this,
-                                                    paths[n],
-                                                    winNumber,
-                                                    wxT("Canvas Frame"),
-                                                    wxDefaultPosition, wxSize(300, 300),
-                                                    wxDEFAULT_FRAME_STYLE |
-                                                    wxNO_FULL_REPAINT_ON_RESIZE
-        );
+                paths[n],
+                winNumber,
+                wxT("Canvas Frame"),
+                wxDefaultPosition, wxSize(300, 300),
+                wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE
+                                                   );
         m_childhash[winNumber] = subframe;
 
         // create own marker tree
         m_treehash[winNumber] = new OPJMarkerTree(m_bookCtrl, subframe, paths[n],
-                                                  wxT("Parsing..."), TreeTest_Ctrl,
-                                                  wxDefaultPosition, wxDefaultSize,
-                                                  wxTR_DEFAULT_STYLE | wxSUNKEN_BORDER
-        );
+                wxT("Parsing..."), TreeTest_Ctrl,
+                wxDefaultPosition, wxDefaultSize,
+                wxTR_DEFAULT_STYLE | wxSUNKEN_BORDER
+                                                 );
 
         m_bookCtrl->AddPage(m_treehash[winNumber], wxString::Format(wxT("%u"),
-                                                                    winNumber), false);
+                            winNumber), false);
 
         for (unsigned int p = 0; p < m_bookCtrl->GetPageCount(); p++) {
             if (m_bookCtrl->GetPageText(p) == wxString::Format(wxT("%u"), winNumber)) {
@@ -1395,25 +1390,25 @@ void OPJFrame::OnFileOpen(wxCommandEvent& WXUNUSED(event))
 {
     wxString wildcards =
 #ifdef __WXMOTIF__
-            wxT("JPEG 2000 files (*.jp2,*.j2k,*.j2c,*.mj2)|*.*j*2*");
+        wxT("JPEG 2000 files (*.jp2,*.j2k,*.j2c,*.mj2)|*.*j*2*");
 #else
 #if wxUSE_LIBOPENJPEG
-            wxT("JPEG 2000 files (*.jp2,*.j2k,*.j2c,*.mj2)|*.jp2;*.j2k;*.j2c;*.mj2")
+        wxT("JPEG 2000 files (*.jp2,*.j2k,*.j2c,*.mj2)|*.jp2;*.j2k;*.j2c;*.mj2")
 #endif
 #if USE_MXF
-            wxT("|MXF JPEG 2000 video (*.mxf)|*.mxf")
+        wxT("|MXF JPEG 2000 video (*.mxf)|*.mxf")
 #endif // USE_MXF
 #if wxUSE_LIBJPEG
-            wxT("|JPEG files (*.jpg)|*.jpg")
+        wxT("|JPEG files (*.jpg)|*.jpg")
 #endif
 #if OPJ_MANYFORMATS
-            wxT("|BMP files (*.bmp)|*.bmp")
-            wxT("|PNG files (*.png)|*.png")
-            wxT("|GIF files (*.gif)|*.gif")
-            wxT("|PNM files (*.pnm)|*.pnm")
-            wxT("|TIFF files (*.tif,*.tiff)|*.tif*")
+        wxT("|BMP files (*.bmp)|*.bmp")
+        wxT("|PNG files (*.png)|*.png")
+        wxT("|GIF files (*.gif)|*.gif")
+        wxT("|PNM files (*.pnm)|*.pnm")
+        wxT("|TIFF files (*.tif,*.tiff)|*.tif*")
 #endif
-            wxT("|All files|*");
+        wxT("|All files|*");
 #endif
     wxFileDialog dialog(this, _T("Open image file(s)"),
                         wxEmptyString, wxEmptyString, wildcards,
@@ -1441,7 +1436,7 @@ void OPJFrame::OnFileSaveAs(wxCommandEvent& WXUNUSED(event))
         wxT("|JPEG 2000 file format (*.jp2)|*.jp2");
 #endif
 #else
-            wxT("Houston we have a problem");
+        wxT("Houston we have a problem");
 #endif
 
     wxFileDialog dialog(this, _T("Save image file"),
@@ -1484,10 +1479,10 @@ BEGIN_EVENT_TABLE(OPJCanvas, wxScrolledWindow)
 END_EVENT_TABLE()
 
 // Define a constructor for my canvas
-OPJCanvas::OPJCanvas(wxFileName fname, wxWindow *parent, const wxPoint &pos,
-                     const wxSize &size)
-        : wxScrolledWindow(parent, wxID_ANY, pos, size,
-                           wxSUNKEN_BORDER | wxNO_FULL_REPAINT_ON_RESIZE)
+OPJCanvas::OPJCanvas(wxFileName fname, wxWindow *parent, const wxPoint& pos,
+                     const wxSize& size)
+    : wxScrolledWindow(parent, wxID_ANY, pos, size,
+                       wxSUNKEN_BORDER | wxNO_FULL_REPAINT_ON_RESIZE)
 {
     SetBackgroundColour(OPJ_CANVAS_COLOUR);
 
@@ -1550,12 +1545,10 @@ void OPJCanvas::OnDraw(wxDC& dc)
             dc.SetBrush(*wxTRANSPARENT_BRUSH);
             //int tw, th;
             dc.DrawRectangle(OPJ_CANVAS_BORDER, OPJ_CANVAS_BORDER,
-                             (unsigned long int) (0.5 + (double) m_zooml *
-                                                        (double) m_childframe->m_twidth /
-                                                        100.0),
-                             (unsigned long int) (0.5 + (double) m_zooml *
-                                                        (double) m_childframe->m_theight /
-                                                        100.0));
+                             (unsigned long int)(0.5 + (double) m_zooml * (double) m_childframe->m_twidth /
+                                                 100.0),
+                             (unsigned long int)(0.5 + (double) m_zooml * (double) m_childframe->m_theight /
+                                                 100.0));
         }
 
     } else {
@@ -1627,18 +1620,18 @@ void OPJCanvas::OnThreadSignal(wxCommandEvent& event)
 // duplicate event handlers here.
 
 BEGIN_EVENT_TABLE(OPJChildFrame, wxMDIChildFrame)
-/*EVT_MENU(SASHTEST_CHILD_QUIT, OPJChildFrame::OnQuit)*/
-EVT_CLOSE(OPJChildFrame::OnClose)
-EVT_SET_FOCUS(OPJChildFrame::OnGotFocus)
-EVT_KILL_FOCUS(OPJChildFrame::OnLostFocus)
+    /*EVT_MENU(SASHTEST_CHILD_QUIT, OPJChildFrame::OnQuit)*/
+    EVT_CLOSE(OPJChildFrame::OnClose)
+    EVT_SET_FOCUS(OPJChildFrame::OnGotFocus)
+    EVT_KILL_FOCUS(OPJChildFrame::OnLostFocus)
 END_EVENT_TABLE()
 
 OPJChildFrame::OPJChildFrame(OPJFrame *parent, wxFileName fname, int winnumber,
-                             const wxString &title, const wxPoint &pos, const wxSize &size,
-                             const long style) :
-        wxMDIChildFrame(parent, wxID_ANY, title, pos, size, style)
+                             const wxString& title, const wxPoint& pos, const wxSize& size,
+                             const long style):
+    wxMDIChildFrame(parent, wxID_ANY, title, pos, size, style)
 {
-    m_frame = (OPJFrame *) parent;
+    m_frame = (OPJFrame  *) parent;
     m_canvas = NULL;
     //my_children.Append(this);
     m_fname = fname;
@@ -1656,8 +1649,8 @@ OPJChildFrame::OPJChildFrame(OPJFrame *parent, wxFileName fname, int winnumber,
     int width, height;
     GetClientSize(&width, &height);
 
-    OPJCanvas * canvas = new OPJCanvas(fname, this, wxPoint(0, 0), wxSize(width,
-                                                                          height));
+    OPJCanvas *canvas = new OPJCanvas(fname, this, wxPoint(0, 0), wxSize(width,
+                                      height));
 #if USE_PENCIL_ON_CANVAS
     canvas->SetCursor(wxCursor(wxCURSOR_PENCIL));
 #endif
@@ -1683,7 +1676,7 @@ void OPJChildFrame::OnClose(wxCloseEvent& event)
 {
     for (unsigned int p = 0; p < m_frame->m_bookCtrl->GetPageCount(); p++) {
         if (m_frame->m_bookCtrl->GetPageText(p) == wxString::Format(wxT("%u"),
-                                                                    m_winnumber)) {
+                m_winnumber)) {
             m_frame->m_bookCtrl->DeletePage(p);
             break;
         }
@@ -1709,7 +1702,7 @@ void OPJChildFrame::OnGotFocus(wxFocusEvent& event)
     for (unsigned int p = 0; p < m_frame->m_bookCtrl->GetPageCount(); p++) {
 
         if (m_frame->m_bookCtrl->GetPageText(p) == wxString::Format(wxT("%u"),
-                                                                    m_winnumber)) {
+                m_winnumber)) {
             m_frame->m_bookCtrl->ChangeSelection(p);
             break;
         }
