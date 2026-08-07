@@ -46,6 +46,10 @@ public class TestJp2Decoder {
         assertTrue("jp2 file not detected as jpeg 2000", JP2Decoder.isJPEG2000(data));
         data = util.loadAssetFile("lena.j2k");
         assertTrue("j2k file not detected as jpeg 2000", JP2Decoder.isJPEG2000(data));
+        data = util.loadAssetFile("oj-ht-byte.jph");
+        assertTrue("jph file not detected as jpeg 2000", JP2Decoder.isJPEG2000(data));
+        data = util.loadAssetFile("butterfly.jhc");
+        assertTrue("jhc file not detected as jpeg 2000", JP2Decoder.isJPEG2000(data));
         data = util.loadAssetFile("lena.png");
         assertFalse("png file detected as jpeg 2000", JP2Decoder.isJPEG2000(data));
         data = null;
@@ -76,6 +80,40 @@ public class TestJp2Decoder {
     public void testDecodeSimple() throws Exception {
         String[] jp2Files = new String[] {"lena.jp2", "lena.j2k", "1x1.jp2", "1x1.j2k", "lena-grey.jp2"};
         String[] expectedFiles = new String[] {"lena.png", "lena.png", "1x1.png", "1x1.png", "lena-grey.png"};
+
+
+        for (int i = 0; i < jp2Files.length; i++) {
+            Bitmap expected = util.loadAssetBitmap(expectedFiles[i]);
+
+            //test decode from file
+            File outFile = util.createFile(util.loadAssetFile(jp2Files[i]));
+
+            Bitmap decoded = new JP2Decoder(outFile.getPath()).decode();
+            assertFalse(decoded.hasAlpha());
+
+            util.assertBitmapsEqual(expected, decoded);
+            outFile.delete();
+
+            //test decode from stream
+            try (InputStream in = util.openAssetStream(jp2Files[i])) {
+                decoded = new JP2Decoder(in).decode();
+                util.assertBitmapsEqual(expected, decoded);
+            }
+
+            //test decode from byte array
+            byte[] data = util.loadAssetFile(jp2Files[i]);
+            decoded = new JP2Decoder(data).decode();
+            util.assertBitmapsEqual(expected, decoded);
+        }
+    }
+
+    /*
+      Decode a HTJ2K image, compare it with the expected results.
+     */
+    @Test
+    public void testDecodeHTJ2K() throws Exception {
+        String[] jp2Files = new String[] {"butterfly.jhc", "grok-ht.jhc", "oj-ht-byte.jph", "oj-ht-byte_causal.jhc", "tileoffset-ojph.jhc"};
+        String[] expectedFiles = new String[] {"butterfly.png", "grok-ht.png", "oj-ht-byte.png", "oj-ht-byte_causal.png", "tileoffset-ojph.png"};
 
 
         for (int i = 0; i < jp2Files.length; i++) {
