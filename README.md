@@ -1,6 +1,6 @@
 # JP2 for Android
 ---------------------------
-An open-source JPEG-2000 image encoder/decoder for Android based on [OpenJPEG](http://www.openjpeg.org/) v2.4.0.
+An open-source JPEG-2000 image encoder/decoder for Android based on [OpenJPEG](http://www.openjpeg.org/) v2.5.2.
 
 ## Set up
 Add dependency to your `build.gradle`:
@@ -119,3 +119,5 @@ byte[] j2kdata = new JP2Encoder(bmp)
                      .setOutputFormat(FORMAT_J2K)
                      .encode();
 ```
+
+[High-Throughput JPEG-2000](https://jpeg.org/jpeg2000/htj2k.html) (or HTJ2K) is supported for decoding only.

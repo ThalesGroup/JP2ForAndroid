@@ -60,25 +60,6 @@ typedef struct image_header {
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
-int get_file_format(const char *filename) {
-    unsigned int i;
-    static const char *extension[] = {"j2k", "jp2", "j2c", "jpc" };
-    static const int format[] = { J2K_CFMT, JP2_CFMT, J2K_CFMT, J2K_CFMT };
-    const char * ext = strrchr(filename, '.');
-    if (ext == NULL)
-        return -1;
-    ext++;
-    if(ext) {
-        for(i = 0; i < sizeof(format)/sizeof(*format); i++) {
-            if(strcasecmp(ext, extension[i]) == 0) {
-                return format[i];
-            }
-        }
-    }
-
-    return -1;
-}
-
 static int get_magic_format(char *buf) {
     int magic_format;
     if (memcmp(buf, JP2_RFC3745_MAGIC, 12) == 0 || memcmp(buf, JP2_MAGIC, 4) == 0) {
@@ -117,8 +98,6 @@ static int infile_format(const char *fname)
 
 
 
-    ext_format = get_file_format(fname);
-
     magic_format = get_magic_format((char *)buf);
     if (magic_format == JP2_CFMT) {
         magic_s = ".jp2";
@@ -128,13 +107,6 @@ static int infile_format(const char *fname)
         LOGE("Unrecognized file format");
         return -1;
     }
-
-    if (magic_format == ext_format)
-        return ext_format;
-
-    s = fname + strlen(fname) - 4;
-
-    LOGE("The extension of this file is incorrect.\nFOUND %s. SHOULD BE %s", s, magic_s);
 
     return magic_format;
 }

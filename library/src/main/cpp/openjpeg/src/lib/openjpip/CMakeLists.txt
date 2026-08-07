@@ -62,9 +62,7 @@ endif()
 add_library(openjpip ${OPENJPIP_SRCS} ${LOCAL_SRCS})
 set_target_properties(openjpip
   PROPERTIES ${OPENJPEG_LIBRARY_PROPERTIES})
-if(NOT ${CMAKE_VERSION} VERSION_LESS "2.8.12")
-  target_compile_options(openjpip PRIVATE ${OPENJPEG_LIBRARY_COMPILE_OPTIONS})
-endif()
+target_compile_options(openjpip PRIVATE ${OPENJPEG_LIBRARY_COMPILE_OPTIONS})
 target_link_libraries(openjpip ${OPENJPEG_LIBRARY_NAME})
 if(WIN32)
   # add Winsock on windows+mingw
@@ -74,9 +72,9 @@ endif()
 # Install library
 install(TARGETS openjpip
   EXPORT OpenJPEGTargets
-  RUNTIME DESTINATION ${OPENJPEG_INSTALL_BIN_DIR} COMPONENT Applications
-  LIBRARY DESTINATION ${OPENJPEG_INSTALL_LIB_DIR} COMPONENT Libraries
-  ARCHIVE DESTINATION ${OPENJPEG_INSTALL_LIB_DIR} COMPONENT Libraries
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Applications
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
   )
 
 if(BUILD_JPIP_SERVER)
@@ -86,6 +84,6 @@ if(BUILD_JPIP_SERVER)
     PROPERTIES COMPILE_FLAGS "-DSERVER")
   install(TARGETS openjpip_server
     EXPORT OpenJPEGTargets
-    DESTINATION ${OPENJPEG_INSTALL_LIB_DIR} COMPONENT Libraries
+          DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
     )
 endif()

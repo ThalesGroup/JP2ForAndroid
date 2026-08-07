@@ -44,9 +44,7 @@ endif()
 # Loop over all executables:
 foreach(exe opj_decompress opj_compress opj_dump)
   add_executable(${exe} ${exe}.c ${common_SRCS})
-  if(NOT ${CMAKE_VERSION} VERSION_LESS "2.8.12")
-    target_compile_options(${exe} PRIVATE ${OPENJP2_COMPILE_OPTIONS})
-  endif()
+  target_compile_options(${exe} PRIVATE ${OPENJP2_COMPILE_OPTIONS})
   target_link_libraries(${exe} ${OPENJPEG_LIBRARY_NAME}
     ${PNG_LIBNAME} ${TIFF_LIBNAME} ${LCMS_LIBNAME}
     )
@@ -67,7 +65,7 @@ foreach(exe opj_decompress opj_compress opj_dump)
   # Install exe
   install(TARGETS ${exe}
     EXPORT OpenJPEGTargets
-    DESTINATION ${OPENJPEG_INSTALL_BIN_DIR} COMPONENT Applications
+          DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Applications
   )
   if(OPJ_USE_DSYMUTIL)
     add_custom_command(TARGET ${exe} POST_BUILD
@@ -83,6 +81,6 @@ install(
   FILES       ${OPENJPEG_SOURCE_DIR}/doc/man/man1/opj_compress.1
               ${OPENJPEG_SOURCE_DIR}/doc/man/man1/opj_decompress.1
               ${OPENJPEG_SOURCE_DIR}/doc/man/man1/opj_dump.1
-  DESTINATION ${OPENJPEG_INSTALL_MAN_DIR}/man1)
+        DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 #
 endif()

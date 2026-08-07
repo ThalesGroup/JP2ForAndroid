@@ -14,8 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * JPEG-2000 bitmap decoder. The supported data formats are: JP2 (standard JPEG-2000 file format) and J2K
- * (JPEG-2000 codestream). Only RGB(A) and grayscale(A) colorspaces are supported.
+ * JPEG-2000 bitmap decoder. The supported data formats are: <ul>
+ *     <li>JP2 (standard JPEG-2000 file format)</li>
+ *     <li>J2K (JPEG-2000 codestream)</li>
+ *     <li>JPH (High-Throughput JPEG-2000 file format)</li>
+ *     <li>JHC (High-Throughput JPEG-2000 codestream)</li>
+ *  </ul>
+ *  Only RGB(A) and grayscale(A) colorspaces are supported.
  */
 public class JP2Decoder {
     private static final String TAG = "JP2Decoder";

@@ -3,7 +3,7 @@
 
 # Sets the minimum version of CMake required to build the native library.
 
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.5...3.31.5)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_JPIP")
 
@@ -45,6 +45,8 @@ add_library( # Sets the name of the library.
              src/main/cpp/openjpeg/src/lib/openjp2/thix_manager.c
              src/main/cpp/openjpeg/src/lib/openjp2/thread.c
              src/main/cpp/openjpeg/src/lib/openjp2/tpix_manager.c
+             src/main/cpp/openjpeg/src/lib/openjp2/ht_dec.c
+             src/main/cpp/openjpeg/src/lib/openjp2/t1_ht_generate_luts.c
              src/main/cpp/openjpeg/src/bin/common/color.c
              src/main/cpp/openjpg.cpp
              )

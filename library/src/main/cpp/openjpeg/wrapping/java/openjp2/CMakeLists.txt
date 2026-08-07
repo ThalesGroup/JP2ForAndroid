@@ -28,9 +28,6 @@ add_library(openjpegjni MODULE
 set_property(TARGET openjpegjni PROPERTY NO_SONAME 1)
 
 # FIXME (need to use old API):
-if(BUILD_MJ2)
-  target_link_libraries(openjpegjni openmj2)
-endif()
 target_link_libraries(openjpegjni
   ${PNG_LIBNAME} ${TIFF_LIBNAME} ${LCMS_LIBNAME} ${Z_LIBNAME}
 )
@@ -69,5 +66,5 @@ add_custom_target(OpenJPEGJavaJar ALL
 )
 
 install(FILES ${LIBRARY_OUTPUT_PATH}/openjpeg.jar
-  DESTINATION ${OPENJPEG_INSTALL_SHARE_DIR} COMPONENT JavaModule
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR} COMPONENT JavaModule
 )
