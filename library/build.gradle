@@ -4,11 +4,11 @@ plugins {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk = 30
+    compileSdk = 36
     namespace 'com.gemalto.jp2'
     defaultConfig {
         minSdk 16
-        targetSdk 30
+        targetSdk 36
         versionName "1.0.5"
         versionCode 5
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -37,8 +37,8 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.annotation:annotation:1.3.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 
 /*************************************************************/
