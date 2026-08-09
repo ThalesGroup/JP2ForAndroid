@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk = 30
+    compileSdk = 36
     namespace = "com.gemalto.jp2.test"
 
     defaultConfig {
         applicationId "com.gemalto.openjpeg.test"
         minSdk 16
-        targetSdk 30
+        targetSdk 36
         versionCode 1
         versionName "1.0"
     }
@@ -28,11 +28,25 @@ android {
             minifyEnabled false
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'org.jetbrains.kotlin') {
+                details.useVersion '1.8.22'
+            }
+        }
+    }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':jp2-android')
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.core:core:1.12.0'
 }
