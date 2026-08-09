@@ -1,9 +1,10 @@
 package com.gemalto.jp2.test;
 
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -20,9 +21,15 @@ import com.gemalto.jp2.JP2Decoder;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,23 +53,29 @@ public class MainActivity extends AppCompatActivity {
         imgView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                //we want to decode the JP2 only when the layout is created and we know the ImageView size
-                imgView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                new DecodeJp2AsyncTask(imgView).execute();
+                //we want to decode the JP2 only when the layout is created, and we know the ImageView size
+                imgView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                decodeJp2(imgView);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 
     private void close(Closeable obj) {
         try {
             if (obj != null) obj.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to close", e);
         }
     }
 
 
-    /**
+    /*
      * This is an example of how to take advantage of the {@link JP2Decoder#setSkipResolutions(int)} method in a multi-resolution JP2 image.
      * We take the size of the ImageView component, the resolution of the image, the number of available resolutions, and we determine how many
      * of them we can skip without losing any detail.
@@ -70,22 +83,16 @@ public class MainActivity extends AppCompatActivity {
      * We know that each successive JP2 resolution is half of the previous resolution. So if the first (highest) resolution is 4000x3000, then
      * the next resolution (if present) will be 2000x1500, the next one 1000x750, and so on.
      *
-     * Therefore if the ImageView size is 1800x1800 for example, we know that we can skip one resolution. (The 2000x1500 version is bigger - at least
-     * in one dimension - than 1800x1800. The 1000x750 is smaller and we would lose image details.)
+     * Therefore, if the ImageView size is 1800x1800 for example, we know that we can skip one resolution. (The 2000x1500 version is bigger - at least
+     * in one dimension - than 1800x1800. The 1000x750 is smaller, and we would lose image details.)
      */
-    private class DecodeJp2AsyncTask extends AsyncTask<Void, Void, Bitmap> {
-        private ImageView view;
-        private int width, height;
+    private void decodeJp2(ImageView view) {
+        //get the size of the ImageView
+        final int width = view.getWidth();
+        final int height = view.getHeight();
+        final WeakReference<ImageView> imageViewReference = new WeakReference<>(view);
 
-        public DecodeJp2AsyncTask(final ImageView view) {
-            this.view = view;
-            //get the size of the ImageView
-            width = view.getWidth();
-            height = view.getHeight();
-        }
-
-        @Override
-        protected Bitmap doInBackground(final Void... voids) {
+        executorService.execute(() -> {
             Log.d(TAG, String.format("View resolution: %d x %d", width, height));
             Bitmap ret = null;
             InputStream in = null;
@@ -123,18 +130,18 @@ public class MainActivity extends AppCompatActivity {
                 ret = decoder.decode();
                 Log.d(TAG, String.format("Decoded at resolution: %d x %d", ret.getWidth(), ret.getHeight()));
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Failed to decode JP2", e);
             } finally {
                 close(in);
             }
-            return ret;
-        }
 
-        @Override
-        protected void onPostExecute(final Bitmap bitmap) {
-            if (bitmap != null) {
-                view.setImageBitmap(bitmap);
-            }
-        }
+            final Bitmap bitmap = ret;
+            mainHandler.post(() -> {
+                ImageView imageView = imageViewReference.get();
+                if (imageView != null && bitmap != null) {
+                    imageView.setImageBitmap(bitmap);
+                }
+            });
+        });
     }
 }
