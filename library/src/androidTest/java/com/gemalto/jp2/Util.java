@@ -3,6 +3,7 @@ package com.gemalto.jp2;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -83,7 +84,9 @@ public class Util {
         try (InputStream is = ctx.getResources().getAssets().open(name)) {
             BitmapFactory.Options opts = new BitmapFactory.Options();
             opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            opts.inPremultiplied = false;
+            if (Build.VERSION.SDK_INT >= 19) {
+                opts.inPremultiplied = false;
+            }
             Bitmap bmp = BitmapFactory.decodeStream(is, null, opts);
             if (bmp.getConfig() != Bitmap.Config.ARGB_8888) {
                 //convert to ARGB_8888 for pixel comparison purposes

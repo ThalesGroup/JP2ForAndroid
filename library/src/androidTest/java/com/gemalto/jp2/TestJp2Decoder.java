@@ -2,6 +2,7 @@ package com.gemalto.jp2;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -282,45 +283,60 @@ public class TestJp2Decoder {
         int[] decodedClean, decodedPremultiplied; //decoded jp2 data, pre-multiplication off and on
         int[] expectedClean, expectedPremultiplied; //loaded raw data, once clean, once run through pre-multiplication
 
+        //premultiplication can't be disabled in pre-KitKat SDKs; in case of testing on such old SDKs
+        //we test that we get premultiplied data even if un-premultiplied data was requested
+        boolean isPremultiplicationOffSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
         // test with RGBA file, greyscale file with alpha, and opaque file
         for (String file : new String[]{"transparent", "transparent-grey", "lena"}) {
             boolean transparent = file.startsWith("transparent");
             //decode transparent bitmap, pre-multiplication off
-            Bitmap bmp = new JP2Decoder(util.loadAssetFile(file + ".jp2"))
+            Bitmap bmpClean = new JP2Decoder(util.loadAssetFile(file + ".jp2"))
                     .disableBitmapPremultiplication()
                     .decode();
-            assertEquals("error in " + file + ".jp2 alpha", transparent, bmp.hasAlpha());
-            //isPremultiplied() should return false for both transparent and opaque bitmap
-            assertEquals("error in " + file + ".jp2 premultiplication", false, bmp.isPremultiplied());
-            decodedClean = new int[bmp.getWidth() * bmp.getHeight()];
-            bmp.getPixels(decodedClean, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+            assertEquals("error in " + file + ".jp2 alpha", transparent, bmpClean.hasAlpha());
+            if (isPremultiplicationOffSupported) {
+                //isPremultiplied() should return false for both transparent and opaque bitmap
+                assertEquals("error in " + file + ".jp2 premultiplication", false, bmpClean.isPremultiplied());
+            }
+            decodedClean = new int[bmpClean.getWidth() * bmpClean.getHeight()];
+            bmpClean.getPixels(decodedClean, 0, bmpClean.getWidth(), 0, 0, bmpClean.getWidth(), bmpClean.getHeight());
 
             //decode transparent bitmap, pre-multiplication on
-            bmp = new JP2Decoder(util.loadAssetFile(file + ".jp2"))
-                    .decode();
-            assertEquals("error in " + file + ".jp2 alpha", transparent, bmp.hasAlpha());
-            //isPremultiplied() should return true for transparent bitmap; false for opaque one
-            assertEquals("error in " + file + ".jp2 premultiplication", transparent, bmp.isPremultiplied());
-            decodedPremultiplied = new int[bmp.getWidth() * bmp.getHeight()];
-            bmp.getPixels(decodedPremultiplied, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+            Bitmap bmpPremultiplied = new JP2Decoder(util.loadAssetFile(file + ".jp2")).decode();
+            assertEquals("error in " + file + ".jp2 alpha", transparent, bmpPremultiplied.hasAlpha());
+            if (isPremultiplicationOffSupported) {
+                //isPremultiplied() should return true for transparent bitmap; false for opaque one
+                assertEquals("error in " + file + ".jp2 premultiplication", transparent, bmpPremultiplied.isPremultiplied());
+            }
+            decodedPremultiplied = new int[bmpPremultiplied.getWidth() * bmpPremultiplied.getHeight()];
+            bmpPremultiplied.getPixels(decodedPremultiplied, 0, bmpPremultiplied.getWidth(), 0, 0, bmpPremultiplied.getWidth(), bmpPremultiplied.getHeight());
 
             //load expected bitmap, pre-multiplication off
             expectedClean = util.loadAssetRawPixels(file + ".raw");
             //load expected bitmap, pre-multiplication on
             expectedPremultiplied = new int[expectedClean.length];
-            util.loadAssetRawBitmap(file + ".raw", bmp.getWidth(), bmp.getHeight())
-                .getPixels(expectedPremultiplied, 0, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+            util.loadAssetRawBitmap(file + ".raw", bmpPremultiplied.getWidth(), bmpPremultiplied.getHeight())
+                .getPixels(expectedPremultiplied, 0, bmpPremultiplied.getWidth(), 0, 0, bmpPremultiplied.getWidth(), bmpPremultiplied.getHeight());
+
+            //in case of pre-Kitkat SDK where disabling premultiplication is not supported,
+            //we only expect premultiplied data, no clean data, for transparent images
+            if (transparent && !isPremultiplicationOffSupported) {
+                expectedClean = expectedPremultiplied;
+            }
 
             //compare the data
             if (transparent) {
                 //make sure clean and pre-multiplied data is loaded as expected
                 util.assertBitmapsEqual("error in " + file + ".jp2", expectedClean, decodedClean);
                 util.assertBitmapsEqual("error in " + file + ".jp2", expectedPremultiplied, decodedPremultiplied);
-                //make sure clean and pre-multiplied data is different from each other
-                assertFalse("error in " + file + ".jp2 - premultiplied and non-premultiplied data should not be the same",
+                if (isPremultiplicationOffSupported) {
+                    //make sure clean and pre-multiplied data is different from each other
+                    assertFalse("error in " + file + ".jp2 - premultiplied and non-premultiplied data should not be the same",
                             Arrays.equals(expectedClean, decodedPremultiplied));
-                assertFalse("error in " + file + ".jp2 - premultiplied and non-premultiplied data should not be the same",
+                    assertFalse("error in " + file + ".jp2 - premultiplied and non-premultiplied data should not be the same",
                             Arrays.equals(expectedPremultiplied, decodedClean));
+                }
             } else {
                 //make sure all the data is the same
                 util.assertBitmapsEqual("error in " + file + ".jp2", expectedClean, decodedClean);

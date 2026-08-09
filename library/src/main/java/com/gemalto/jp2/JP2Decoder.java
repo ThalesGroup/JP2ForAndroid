@@ -1,5 +1,6 @@
 package com.gemalto.jp2;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -120,6 +121,7 @@ public class JP2Decoder {
      * @see Bitmap#setPremultiplied(boolean)
      * @see BitmapFactory.Options#inPremultiplied
      */
+    @SuppressLint("ObsoleteSdkInt")
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public JP2Decoder disableBitmapPremultiplication() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
