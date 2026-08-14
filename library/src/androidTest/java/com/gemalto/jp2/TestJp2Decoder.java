@@ -289,60 +289,57 @@ public class TestJp2Decoder {
 
         // test with RGBA file, greyscale file with alpha, and opaque file
         for (String file : new String[]{"transparent", "transparent-grey", "lena"}) {
-            boolean transparent = file.startsWith("transparent");
-            //decode transparent bitmap, pre-multiplication off
-            Bitmap bmpClean = new JP2Decoder(util.loadAssetFile(file + ".jp2"))
-                    .disableBitmapPremultiplication()
-                    .decode();
-            assertEquals("error in " + file + ".jp2 alpha", transparent, bmpClean.hasAlpha());
-            if (isPremultiplicationOffSupported) {
-                //isPremultiplied() should return false for both transparent and opaque bitmap
-                assertEquals("error in " + file + ".jp2 premultiplication", false, bmpClean.isPremultiplied());
-            }
-            decodedClean = new int[bmpClean.getWidth() * bmpClean.getHeight()];
-            bmpClean.getPixels(decodedClean, 0, bmpClean.getWidth(), 0, 0, bmpClean.getWidth(), bmpClean.getHeight());
+            try {
+                boolean transparent = file.startsWith("transparent");
+                //decode transparent bitmap, pre-multiplication off
+                Bitmap bmpClean = new JP2Decoder(util.loadAssetFile(file + ".jp2"))
+                        .disableBitmapPremultiplication()
+                        .decode();
 
-            //decode transparent bitmap, pre-multiplication on
-            Bitmap bmpPremultiplied = new JP2Decoder(util.loadAssetFile(file + ".jp2")).decode();
-            assertEquals("error in " + file + ".jp2 alpha", transparent, bmpPremultiplied.hasAlpha());
-            if (isPremultiplicationOffSupported) {
+                if (!isPremultiplicationOffSupported) {
+                    fail("Disabling pre-multiplication is not supported on API " + Build.VERSION.SDK_INT + ", yet exception was not thrown");
+                }
+
+                assertEquals("error in " + file + ".jp2 alpha", transparent, bmpClean.hasAlpha());
+                //isPremultiplied() should return false for both transparent and opaque bitmap
+                assertFalse("error in " + file + ".jp2 premultiplication", bmpClean.isPremultiplied());
+                decodedClean = new int[bmpClean.getWidth() * bmpClean.getHeight()];
+                bmpClean.getPixels(decodedClean, 0, bmpClean.getWidth(), 0, 0, bmpClean.getWidth(), bmpClean.getHeight());
+
+                //decode transparent bitmap, pre-multiplication on
+                Bitmap bmpPremultiplied = new JP2Decoder(util.loadAssetFile(file + ".jp2")).decode();
+                assertEquals("error in " + file + ".jp2 alpha", transparent, bmpPremultiplied.hasAlpha());
                 //isPremultiplied() should return true for transparent bitmap; false for opaque one
                 assertEquals("error in " + file + ".jp2 premultiplication", transparent, bmpPremultiplied.isPremultiplied());
-            }
-            decodedPremultiplied = new int[bmpPremultiplied.getWidth() * bmpPremultiplied.getHeight()];
-            bmpPremultiplied.getPixels(decodedPremultiplied, 0, bmpPremultiplied.getWidth(), 0, 0, bmpPremultiplied.getWidth(), bmpPremultiplied.getHeight());
+                decodedPremultiplied = new int[bmpPremultiplied.getWidth() * bmpPremultiplied.getHeight()];
+                bmpPremultiplied.getPixels(decodedPremultiplied, 0, bmpPremultiplied.getWidth(), 0, 0, bmpPremultiplied.getWidth(), bmpPremultiplied.getHeight());
 
-            //load expected bitmap, pre-multiplication off
-            expectedClean = util.loadAssetRawPixels(file + ".raw");
-            //load expected bitmap, pre-multiplication on
-            expectedPremultiplied = new int[expectedClean.length];
-            util.loadAssetRawBitmap(file + ".raw", bmpPremultiplied.getWidth(), bmpPremultiplied.getHeight())
-                .getPixels(expectedPremultiplied, 0, bmpPremultiplied.getWidth(), 0, 0, bmpPremultiplied.getWidth(), bmpPremultiplied.getHeight());
+                //load expected bitmap, pre-multiplication off
+                expectedClean = util.loadAssetRawPixels(file + ".raw");
+                //load expected bitmap, pre-multiplication on
+                expectedPremultiplied = new int[expectedClean.length];
+                util.loadAssetRawBitmap(file + ".raw", bmpPremultiplied.getWidth(), bmpPremultiplied.getHeight())
+                    .getPixels(expectedPremultiplied, 0, bmpPremultiplied.getWidth(), 0, 0, bmpPremultiplied.getWidth(), bmpPremultiplied.getHeight());
 
-            //in case of pre-Kitkat SDK where disabling premultiplication is not supported,
-            //we only expect premultiplied data, no clean data, for transparent images
-            if (transparent && !isPremultiplicationOffSupported) {
-                expectedClean = expectedPremultiplied;
-            }
-
-            //compare the data
-            if (transparent) {
-                //make sure clean and pre-multiplied data is loaded as expected
-                util.assertBitmapsEqual("error in " + file + ".jp2", expectedClean, decodedClean);
-                util.assertBitmapsEqual("error in " + file + ".jp2", expectedPremultiplied, decodedPremultiplied);
-                if (isPremultiplicationOffSupported) {
+                //compare the data
+                if (transparent) {
+                    //make sure clean and pre-multiplied data is loaded as expected
+                    util.assertBitmapsEqual("error in " + file + ".jp2", expectedClean, decodedClean);
+                    util.assertBitmapsEqual("error in " + file + ".jp2", expectedPremultiplied, decodedPremultiplied);
                     //make sure clean and pre-multiplied data is different from each other
                     assertFalse("error in " + file + ".jp2 - premultiplied and non-premultiplied data should not be the same",
                             Arrays.equals(expectedClean, decodedPremultiplied));
                     assertFalse("error in " + file + ".jp2 - premultiplied and non-premultiplied data should not be the same",
                             Arrays.equals(expectedPremultiplied, decodedClean));
+                } else {
+                    //make sure all the data is the same
+                    util.assertBitmapsEqual("error in " + file + ".jp2", expectedClean, decodedClean);
+                    util.assertBitmapsEqual("error in " + file + ".jp2", expectedPremultiplied, decodedPremultiplied);
+                    util.assertBitmapsEqual("error in " + file + ".jp2", expectedPremultiplied, decodedClean);
+                    util.assertBitmapsEqual("error in " + file + ".jp2", expectedClean, decodedPremultiplied);
                 }
-            } else {
-                //make sure all the data is the same
-                util.assertBitmapsEqual("error in " + file + ".jp2", expectedClean, decodedClean);
-                util.assertBitmapsEqual("error in " + file + ".jp2", expectedPremultiplied, decodedPremultiplied);
-                util.assertBitmapsEqual("error in " + file + ".jp2", expectedPremultiplied, decodedClean);
-                util.assertBitmapsEqual("error in " + file + ".jp2", expectedClean, decodedPremultiplied);
+            } catch (UnsupportedOperationException e) {
+                assertFalse("Disabling pre-multiplication should be supported on API " + Build.VERSION.SDK_INT + ", yet exception was thrown", isPremultiplicationOffSupported);
             }
         }
     }

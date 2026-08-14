@@ -113,13 +113,14 @@ public class JP2Decoder {
      * displaying the bitmap, but it leads to loss of precision. This is no problem when you only want to display
      * the bitmap, but it can be a problem when you want to further process the bitmap's raw data.<br><br>
      *
-     * Since API 19 you can turn this pre-multiplication off. The loss of precision doesn't occur then, but the system
-     * won't be able to draw the output bitmap. On API &lt; 19 this setting is ignored.<br><br>
+     * This pre-multiplication can be turned off since API 19 (KitKat). The loss of precision doesn't occur then, but the system
+     * won't be able to draw the output bitmap. On API &lt; 19, calling this method will raise an exception.<br><br>
      *
      * In most cases you should not use this.
      * @return this instance of {@code JP2Decoder}
      * @see Bitmap#setPremultiplied(boolean)
      * @see BitmapFactory.Options#inPremultiplied
+     * @throws UnsupportedOperationException if this method is called on API &lt; 19
      */
     @SuppressLint("ObsoleteSdkInt")
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -127,7 +128,7 @@ public class JP2Decoder {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             this.premultiplication = false;
         } else {
-            Log.e(TAG, "Pre-multiplication cannot be disabled on API < 19. Ignoring.");
+            throw new UnsupportedOperationException("Pre-multiplication cannot be disabled on API < 19");
         }
         return this;
     }
