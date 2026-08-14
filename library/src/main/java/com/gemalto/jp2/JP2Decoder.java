@@ -114,7 +114,7 @@ public class JP2Decoder {
      * the bitmap, but it can be a problem when you want to further process the bitmap's raw data.<br><br>
      *
      * Since API 19 you can turn this pre-multiplication off. The loss of precision doesn't occur then, but the system
-     * wont't be able to draw the output bitmap. On API &lt; 19 this setting is ignored.<br><br>
+     * won't be able to draw the output bitmap. On API &lt; 19 this setting is ignored.<br><br>
      *
      * In most cases you should not use this.
      * @return this instance of {@code JP2Decoder}
@@ -149,7 +149,7 @@ public class JP2Decoder {
      * @return the decoded image; {@code null} in case of an error
      */
     public Bitmap decode() {
-        int res[] = null;
+        int[] res = null;
         if (fileName != null) {
             res = decodeJP2File(fileName, skipResolutions, layersToDecode);
         } else {
@@ -170,7 +170,7 @@ public class JP2Decoder {
      * @return file header information
      */
     public Header readHeader() {
-        int res[] = null;
+        int[] res = null;
         if (fileName != null) {
             res = readJP2HeaderFile(fileName);
         } else {
@@ -194,20 +194,19 @@ public class JP2Decoder {
             return null;
         }
 
-		ByteArrayOutputStream out = null;
-		try {
-			out = new ByteArrayOutputStream(in.available());
-			byte[] buffer = new byte[16 * 1024];
-			int bytesRead = in.read(buffer);
-			while (bytesRead >= 0) {
-				out.write(buffer, 0, bytesRead);
-				bytesRead = in.read(buffer);
-			}
-			return out.toByteArray();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream(in.available());
+            byte[] buffer = new byte[16 * 1024];
+            int bytesRead = in.read(buffer);
+            while (bytesRead >= 0) {
+                out.write(buffer, 0, bytesRead);
+                bytesRead = in.read(buffer);
+            }
+            return out.toByteArray();
+        } catch (IOException e) {
+            Log.e(TAG, "Error reading input stream", e);
+            return null;
+        }
     }
 
     /*

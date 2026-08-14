@@ -27,6 +27,7 @@ public class JP2Encoder {
     private static final String TAG = "JP2Encoder";
 
     private static final int EXIT_SUCCESS = 0;
+    @SuppressWarnings("unused")
     private static final int EXIT_FAILURE = 1;
 
     private static final int DEFAULT_NUM_RESOLUTIONS = 6;
@@ -81,7 +82,7 @@ public class JP2Encoder {
      * Some software might be able to take advantage of this and decode only smaller resolution
      * when appropriate. (This library is one such software. See {@link JP2Decoder#setSkipResolutions(int)}).<br><br>
      *
-     * Default value: 6 if the image dimensions are at least 32x32. Otherwise the maximum supported
+     * Default value: 6 if the image dimensions are at least 32x32. Otherwise, the maximum supported
      * number of resolutions.
      * @param numResolutions number of resolutions
      * @return this {@code JP2Encoder} instance
@@ -113,6 +114,7 @@ public class JP2Encoder {
      * @param compressionRatios compression ratios
      * @return this {@code JP2Encoder} instance
      */
+    @SuppressWarnings("JavadocDeclaration")
     public JP2Encoder setCompressionRatio(float... compressionRatios) {
         if (compressionRatios == null || compressionRatios.length == 0) {
             this.compressionRatios = null;
@@ -158,6 +160,7 @@ public class JP2Encoder {
      * @param qualityValues quality layer PSNR values
      * @return this {@code JP2Encoder} instance
      */
+    @SuppressWarnings("JavadocDeclaration")
     public JP2Encoder setVisualQuality(float... qualityValues) {
         if (qualityValues == null || qualityValues.length == 0) {
             this.qualityValues = null;
