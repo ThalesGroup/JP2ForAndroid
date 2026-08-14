@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
                 decoder.setSkipResolutions(skipVal);
                 decoder.setLayersToDecode(layers);
-                decoder.setSourceRegion(region);
+                decoder.setDecodingArea(region);
 
                 long start = System.currentTimeMillis();
                 //decode the image

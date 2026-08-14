@@ -2,6 +2,7 @@ package com.gemalto.jp2;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -100,6 +101,47 @@ public class TestJp2Decoder {
             byte[] data = util.loadAssetFile(jp2Files[i]);
             decoded = new JP2Decoder(data).decode();
             util.assertBitmapsEqual(expected, decoded);
+        }
+    }
+
+    /*
+      Decode a normal image, a greyscale image, a tiny image, in JP2 and J2K format, compare them with the expected results.
+     */
+    @Test
+    public void testDecodingArea() throws Exception {
+        String[] jp2Files = new String[] {"lena.jp2", "lena.j2k"};
+        String[] expectedFiles = new String[] {"lena.png", "lena.png"};
+
+        //test successful decode
+        for (int i = 0; i < jp2Files.length; i++) {
+            for (Rect decodingArea : new Rect[]{
+                null,
+                new Rect(0, 0, 0, 0),
+                new Rect(51, 52, 53, 54),
+                new Rect(0, 0, 150, 500),
+            }) {
+                Bitmap expected = util.loadAssetBitmap(expectedFiles[i], decodingArea);
+
+                //test decode from file
+                File outFile = util.createFile(util.loadAssetFile(jp2Files[i]));
+
+                Bitmap decoded = new JP2Decoder(outFile.getPath()).setDecodingArea(decodingArea).decode();
+                assertFalse(decoded.hasAlpha());
+
+                util.assertBitmapsEqual(expected, decoded);
+                outFile.delete();
+
+                //test decode from stream
+                try (InputStream in = util.openAssetStream(jp2Files[i])) {
+                    decoded = new JP2Decoder(in).setDecodingArea(decodingArea).decode();
+                    util.assertBitmapsEqual(expected, decoded);
+                }
+
+                //test decode from byte array
+                byte[] data = util.loadAssetFile(jp2Files[i]);
+                decoded = new JP2Decoder(data).decode();
+                util.assertBitmapsEqual(expected, decoded);
+            }
         }
     }
 

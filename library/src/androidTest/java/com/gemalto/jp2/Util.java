@@ -3,6 +3,7 @@ package com.gemalto.jp2;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -79,6 +80,10 @@ public class Util {
         }
     }
 
+    public Bitmap loadAssetBitmap(String name, Rect decodingArea) throws Exception {
+        return part(loadAssetBitmap(name), decodingArea);
+    }
+
     public Bitmap loadAssetBitmap(String name) throws Exception {
         try (InputStream is = ctx.getResources().getAssets().open(name)) {
             BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -140,5 +145,10 @@ public class Util {
         out.write(encoded);
         out.close();
         return outFile;
+    }
+
+    public Bitmap part(Bitmap bmp, Rect rect) {
+        if (rect == null || (rect.top == 0 && rect.bottom == 0 && rect.left == 0 && rect.right == 0)) return bmp;
+        return Bitmap.createBitmap(bmp, rect.left, rect.top, rect.width(), rect.height());
     }
 }
