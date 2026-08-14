@@ -43,7 +43,7 @@ public class JP2Decoder {
     private int skipResolutions = 0;
     private int layersToDecode = 0;
     private boolean premultiplication = true;
-    private Rect sourceRegion = null;
+    private Rect decodingArea = null;
 
     /**
      * Decode a JPEG-2000 image from a byte array.
@@ -104,16 +104,15 @@ public class JP2Decoder {
     }
 
     /**
-     * Sets the region of the source image that should be decoded. The region will be clipped to the
-     * dimensions of the source image. Setting this value to null will result in the entire image
-     * being decoded.
+     * Sets the region of the source image that will be decoded. The region must not extend outside the boundaries of the image.
+     * By default, the whole image is decoded.
      *
-     * @param sourceRegion The source region to decode, or null if the entire image should be
-     * decoded.
+     * @param decodingArea The region of the image to decode, or {@code null} if the entire image should be decoded.
      */
-    public void setSourceRegion(Rect sourceRegion)
+    public JP2Decoder setDecodingArea(Rect decodingArea)
     {
-        this.sourceRegion = sourceRegion;
+        this.decodingArea = decodingArea;
+        return this;
     }
 
     /**
@@ -159,11 +158,11 @@ public class JP2Decoder {
     public Bitmap decode() {
         int res[] = null;
         int regionLeft = 0, regionRight = 0, regionTop = 0, regionBottom = 0;
-        if(sourceRegion != null){
-            regionLeft = sourceRegion.left;
-            regionRight = sourceRegion.right;
-            regionTop = sourceRegion.top;
-            regionBottom = sourceRegion.bottom;
+        if(decodingArea != null){
+            regionLeft = decodingArea.left;
+            regionRight = decodingArea.right;
+            regionTop = decodingArea.top;
+            regionBottom = decodingArea.bottom;
         }
         if (fileName != null) {
             res = decodeJP2File(fileName, skipResolutions, layersToDecode, regionLeft, regionTop, regionRight, regionBottom);
