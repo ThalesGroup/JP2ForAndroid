@@ -110,20 +110,21 @@ public class TestJp2Decoder {
     }
 
     /*
-      Decode a normal image, a greyscale image, a tiny image, in JP2 and J2K format, compare them with the expected results.
+      Decode a normal image with specified decoding area and check the results.
      */
     @Test
-    public void testDecodingArea() throws Exception {
-        String[] jp2Files = new String[] {"lena.jp2", "lena.j2k"};
-        String[] expectedFiles = new String[] {"lena.png", "lena.png"};
+    public void testDecodingAreaNormal() throws Exception {
+        String[] jp2Files = new String[]{"lena.jp2", "lena.j2k"}; //dimensions 512x512
+        String[] expectedFiles = new String[]{"lena.png", "lena.png"};
 
         //test successful decode
         for (int i = 0; i < jp2Files.length; i++) {
             for (Rect decodingArea : new Rect[]{
-                null,
-                new Rect(0, 0, 0, 0),
-                new Rect(51, 52, 53, 54),
-                new Rect(0, 0, 150, 500),
+                    null,
+                    new Rect(0, 0, 0, 0),
+                    new Rect(0, 0, 150, 500),
+                    new Rect(51, 52, 53, 54),
+                    new Rect(0, 0, 512, 512),
             }) {
                 Bitmap expected = util.loadAssetBitmap(expectedFiles[i], decodingArea);
 
@@ -144,9 +145,49 @@ public class TestJp2Decoder {
 
                 //test decode from byte array
                 byte[] data = util.loadAssetFile(jp2Files[i]);
-                decoded = new JP2Decoder(data).decode();
+                decoded = new JP2Decoder(data).setDecodingArea(decodingArea).decode();
                 util.assertBitmapsEqual(expected, decoded);
             }
+        }
+    }
+
+    /*
+      Try decoding an image with decoding area specified badly.
+     */
+    @Test
+    public void testDecodingAreaError() throws Exception {
+        String jp2File = "lena.jp2"; //dimensions 512x512
+
+        for (Rect decodingArea : new Rect[]{
+                //too big width
+                new Rect(0,0,513,512),
+                //smaller width but right border outside the picture
+                new Rect(500,0,550,512),
+                //too big height
+                new Rect(0,0,512,513),
+                //smaller height but bottom border outside the picture
+                new Rect(0,500,512,550),
+        }) {
+            //test decode from file
+            File outFile = util.createFile(util.loadAssetFile(jp2File));
+            Bitmap decoded = new JP2Decoder(outFile.getPath()).setDecodingArea(decodingArea).decode();
+            assertNull("bitmap shouldn't have been decoded:", decoded);
+            outFile.delete();
+
+            //test decode from stream
+            try (InputStream in = util.openAssetStream(jp2File)) {
+                decoded = new JP2Decoder(in).setDecodingArea(decodingArea).decode();
+                assertNull("bitmap shouldn't have been decoded", decoded);
+            }
+
+            //test decode from byte array
+            byte[] data = util.loadAssetFile(jp2File);
+            decoded = new JP2Decoder(data).setDecodingArea(decodingArea).decode();
+            assertNull("bitmap shouldn't have been decoded", decoded);
+        }
+    }
+
+    /*
       Decode a HTJ2K image, compare it with the expected results.
      */
     @Test
@@ -408,6 +449,56 @@ public class TestJp2Decoder {
             fail("Exception should have been thrown");
         } catch (IllegalArgumentException ignored) {
         }
+        for (Rect decodingArea : new Rect[]{
+                //negative coordinates
+                new Rect(-1, 1, 10, 10),
+                new Rect(1, -1, 10, 10),
+                new Rect(1, 1, -10, 10),
+                new Rect(1, 1, 10, -10),
+                //zero-height
+                new Rect(0, 100, 100, 100),
+                //zero-width
+                new Rect(100, 0, 100, 100),
+                //negative width
+                new Rect(100, 1, 50, 100),
+                //negative height
+                new Rect(100, 100, 150, 50),
+        }) {
+            try {
+                dec.setDecodingArea(decodingArea);
+                fail("Exception should have been thrown");
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        //test too small decoding area for the existing skipResolutions parameter
+        dec.setSkipResolutions(3);
+        try {
+            dec.setDecodingArea(new Rect(5, 5, 13, 12));
+            fail("Exception should have been thrown");
+        } catch (IllegalArgumentException ignored) {
+        }
+        try {
+            dec.setDecodingArea(new Rect(17, 17, 24, 25));
+            fail("Exception should have been thrown");
+        } catch (IllegalArgumentException ignored) {
+        }
+        dec.setSkipResolutions(0);
+        //test too small skipResolutions the existing decodingArea parameter
+        dec.setDecodingArea(new Rect(0, 0, 31, 31));
+        for (int i = 1; i < 5; i++) {
+            dec.setSkipResolutions(i); //should work fine
+        }
+        try {
+            dec.setSkipResolutions(5);
+            fail("Exception should have been thrown");
+        } catch (IllegalArgumentException ignored) {
+        }
+        try {
+            dec.setSkipResolutions(15);
+            fail("Exception should have been thrown");
+        } catch (IllegalArgumentException ignored) {
+        }
     }
 
     private static class LRTestParams {
@@ -421,9 +512,10 @@ public class TestJp2Decoder {
             this.decodeLayers = decodeLayers;
         }
     }
+
     @Test
     public void testLayersAndResolutions() throws Exception {
-        byte[] file = util.loadAssetFile("decodeTest.jp2"); //7 resolutions, 5 quality layers
+        byte[] file = util.loadAssetFile("decodeTest.jp2"); //7 resolutions, 5 quality layers, 335x151
         List<LRTestParams> params = new ArrayList<>();
         params.add(new LRTestParams("decodeTest-r3.png", 3, null));
         params.add(new LRTestParams("decodeTest-r3.png", 3, 0));
@@ -444,6 +536,42 @@ public class TestJp2Decoder {
             if (param.skipResolutions != null) dec.setSkipResolutions(param.skipResolutions);
             Bitmap decoded = dec.decode();
             util.assertBitmapsEqual("Error in " + param.file, expected, decoded);
+        }
+    }
+
+    /*
+      Here we test that the expected part of the image is returned when both decodingArea and
+      skipResolutions is used together. The decoding area selects the part of the image to be
+      decoded, and then skipResolutions reduces its size.
+
+      (The decodeLayers and decodingArea parameters don't really interfere with one another;
+      we're just testing both still work when used together.)
+     */
+    @Test
+    public void testDecodingAreaWithLayersAndResolutions() throws Exception {
+        byte[] file = util.loadAssetFile("decodeTest.jp2"); //7 resolutions, 5 quality layers, 335x151
+        List<LRTestParams> params = new ArrayList<>();
+        params.add(new LRTestParams("decodeTest-r3.png", 3, null));
+        params.add(new LRTestParams("decodeTest-l1.png", null, 1));
+        params.add(new LRTestParams("decodeTest-r1l4.png", 1, 4));
+
+        Rect[] decodingAreas = new Rect[]{
+                new Rect(0, 0, 335, 151), //full width and height
+                new Rect(10, 10, 325, 141), //10 px taken from every side
+                new Rect(7, 17, 256, 25), //height 8 px; minimum for skipResolutions 3
+                new Rect(7, 17, 15, 151), //height 8 px; minimum for skipResolutions 3
+        };
+
+        for (LRTestParams param : params) {
+            for (Rect decodingArea : decodingAreas) {
+                Bitmap expected = util.loadAssetBitmap(param.file, util.scaleDownDecodingArea(decodingArea, param.skipResolutions));
+                JP2Decoder dec = new JP2Decoder(file);
+                if (param.decodeLayers != null) dec.setLayersToDecode(param.decodeLayers);
+                if (param.skipResolutions != null) dec.setSkipResolutions(param.skipResolutions);
+                dec.setDecodingArea(decodingArea);
+                Bitmap decoded = dec.decode();
+                util.assertBitmapsEqual("Error in " + param.file, expected, decoded);
+            }
         }
     }
 

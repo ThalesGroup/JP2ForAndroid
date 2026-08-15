@@ -154,4 +154,18 @@ public class Util {
         if (rect == null || (rect.top == 0 && rect.bottom == 0 && rect.left == 0 && rect.right == 0)) return bmp;
         return Bitmap.createBitmap(bmp, rect.left, rect.top, rect.width(), rect.height());
     }
+
+    //scale down the decoding area rectangle by the given number of resolutions
+    public Rect scaleDownDecodingArea(Rect rect, Integer skipResolutions) {
+        if (rect == null || (rect.top == 0 && rect.bottom == 0 && rect.left == 0 && rect.right == 0)) return rect;
+        if (skipResolutions == null || skipResolutions <= 0) return rect;
+        Rect ret = new Rect(rect);
+        for (int i = 0; i < skipResolutions; i++) {
+            ret.left = (ret.left + 1) / 2;
+            ret.right = (ret.right + 1) / 2;
+            ret.top = (ret.top + 1) / 2;
+            ret.bottom = (ret.bottom + 1) / 2;
+        }
+        return ret;
+    }
 }

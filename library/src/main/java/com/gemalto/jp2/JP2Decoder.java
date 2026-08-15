@@ -90,6 +90,7 @@ public class JP2Decoder {
      */
     public JP2Decoder setSkipResolutions(final int skipResolutions) {
         if (skipResolutions < 0) throw new IllegalArgumentException("skipResolutions cannot be a negative number!");
+        validateDecodingAreaAndSkipResolutions(decodingArea, skipResolutions);
         this.skipResolutions = skipResolutions;
         return this;
     }
@@ -111,12 +112,26 @@ public class JP2Decoder {
 
     /**
      * Sets the region of the source image that will be decoded. The region must not extend outside the boundaries of the image.
-     * By default, the whole image is decoded.
+     * By default, the whole image is decoded.<br/><br/>
      *
+     * If {@link #setSkipResolutions(int)} is used together with {@code setDecodingArea}, the decoding
+     * area's resolution will be reduced along with the whole image. I.e. if you set
+     * {@code setDecodingArea(Rect(0, 0, 200, 200))} and {@code setSkipResolutions(3)}, you will get a 25x25 px image
+     * (200x200 divided by 2^3) which contains the 200x200 px top left area of the original image, 8x shrunken.<br><br>
+     *
+     * The decoding area's width and height must be at least {@code 2^skipResolutions} in this case. I.e.
+     * if {@code skipResolutions} is 3, both the decoding area's width and height must be at least 8.
      * @param decodingArea The region of the image to decode, or {@code null} if the entire image should be decoded.
      */
     public JP2Decoder setDecodingArea(Rect decodingArea)
     {
+        if (decodingArea != null && !(decodingArea.left == 0 && decodingArea.right == 0 && decodingArea.top == 0 && decodingArea.bottom == 0)) {
+            if (decodingArea.left < 0) throw new IllegalArgumentException("negative decodingArea.left");
+            if (decodingArea.top < 0) throw new IllegalArgumentException("negative decodingArea.top");
+            if (decodingArea.right - decodingArea.left <= 0) throw new IllegalArgumentException("decodingArea width must be positive");
+            if (decodingArea.bottom - decodingArea.top <= 0) throw new IllegalArgumentException("decodingArea height must be positive");
+        }
+        validateDecodingAreaAndSkipResolutions(decodingArea, skipResolutions);
         this.decodingArea = decodingArea;
         return this;
     }
@@ -164,14 +179,14 @@ public class JP2Decoder {
      * @return the decoded image; {@code null} in case of an error
      */
     public Bitmap decode() {
-        int res[] = null;
         int regionLeft = 0, regionRight = 0, regionTop = 0, regionBottom = 0;
-        if(decodingArea != null){
+        if  (decodingArea != null){
             regionLeft = decodingArea.left;
             regionRight = decodingArea.right;
             regionTop = decodingArea.top;
             regionBottom = decodingArea.bottom;
         }
+        int[] res = null;
         if (fileName != null) {
             res = decodeJP2File(fileName, skipResolutions, layersToDecode, regionLeft, regionTop, regionRight, regionBottom);
         } else {
@@ -271,6 +286,26 @@ public class JP2Decoder {
             if (array1[i] != array2[i]) return false;
         }
         return true;
+    }
+
+    /*
+     skipping resolutions reduces both dimensions of the decoding area by 2^skipResolutions. This
+     could lead to either the width or height of the decoding area to become 0, in which case the
+     image could not be decoded. OpenJPEG actually doesn't check this and the decode simply fails,
+     but we check it here so that we can fail early.
+     */
+    private static void validateDecodingAreaAndSkipResolutions(Rect decodingArea, int skipResolutions) {
+        if (decodingArea == null || (decodingArea.left == 0 && decodingArea.top == 0 && decodingArea.right == 0 && decodingArea.bottom == 0)) {
+            //decoding area is not specified; nothing to check
+            return;
+        }
+        int reductionFactor = 1 << skipResolutions;
+        if (decodingArea.width() < reductionFactor) {
+            throw new IllegalArgumentException("Decoding area width too small for skipResolutions=" + skipResolutions + "; it would become effectively zero.");
+        }
+        if (decodingArea.height() < reductionFactor) {
+            throw new IllegalArgumentException("Decoding area height too small for skipResolutions=" + skipResolutions + "; it would become effectively zero.");
+        }
     }
 
     private static native int[] decodeJP2File(String filename, int reduce, int layers, int left, int top, int right, int bottom);

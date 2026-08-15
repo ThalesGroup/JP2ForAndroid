@@ -487,6 +487,18 @@ int decodeJP2Stream(opj_stream_t *l_stream, opj_dparameters_t *parameters, image
         }
     }
 
+    //fail if the right or the bottom boundary of the area to decode is outside the image
+    if (parameters->DA_x1 > outHeader.width) {
+        LOGE("Right position of the decoded area (region_x1=%d) is outside the image area (Xsiz=%d).", parameters->DA_x1, outHeader.width);
+        opj_destroy_codec(l_codec);
+        return EXIT_FAILURE;
+    }
+    if (parameters->DA_y1 > outHeader.height) {
+        LOGE("Bottom position of the decoded area (region_y1=%d) is outside the image area (Ysiz=%d).", parameters->DA_y1, outHeader.height);
+        opj_destroy_codec(l_codec);
+        return EXIT_FAILURE;
+    }
+
     /* Setup the decoder again with fixed parameters */
     if ( !opj_setup_decoder(l_codec, parameters) ){
         LOGE("ERROR -> j2k_dump: failed to setup the decoder\n");
