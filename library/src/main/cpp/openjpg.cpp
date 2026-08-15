@@ -1005,7 +1005,8 @@ jintArray prepareReturnHeaderData(JNIEnv *env, image_header_t *outHeader) {
 }
 
 //decode a JPEG-2000 encoded file, return in 32-bit raw RGBA pixels
-JNIEXPORT jintArray JNICALL Java_com_gemalto_jp2_JP2Decoder_decodeJP2File(JNIEnv *env, jclass thiz, jstring fileName, jint reduce, jint layers) {
+JNIEXPORT jintArray JNICALL Java_com_gemalto_jp2_JP2Decoder_decodeJP2File(JNIEnv *env, jclass thiz, jstring fileName, jint reduce, jint layers,
+                                                     jint left, jint top, jint right, jint bottom) {
     opj_stream_t *l_stream = NULL;                /* Stream */
     opj_dparameters_t parameters;            /* decompression parameters */
     image_data_t outImage; //output data
@@ -1026,6 +1027,10 @@ JNIEXPORT jintArray JNICALL Java_com_gemalto_jp2_JP2Decoder_decodeJP2File(JNIEnv
     
     parameters.decod_format = infile_format(parameters.infile);
     parameters.cp_layer = layers;
+    parameters.DA_x0 = left;
+    parameters.DA_y0 = top;
+    parameters.DA_x1 = right;
+    parameters.DA_y1 = bottom;
     //We don't set the reduce parameter yet, because if it's too high, it would throw an error.
     //We will set it after we read the image header and find out actual number of resolutions.
 
@@ -1048,7 +1053,8 @@ JNIEXPORT jintArray JNICALL Java_com_gemalto_jp2_JP2Decoder_decodeJP2File(JNIEnv
 }
 
 //decode a JPEG-2000 encoded byte array, return in 32-bit raw RGBA pixels
-JNIEXPORT jintArray JNICALL Java_com_gemalto_jp2_JP2Decoder_decodeJP2ByteArray(JNIEnv *env, jclass thiz, jbyteArray data, jint reduce, jint layers) {
+JNIEXPORT jintArray JNICALL Java_com_gemalto_jp2_JP2Decoder_decodeJP2ByteArray(JNIEnv *env, jclass thiz, jbyteArray data,
+                  jint reduce, jint layers, jint left, jint top, jint right, jint bottom) {
     opj_stream_t *l_stream = NULL;                /* Stream */
     opj_dparameters_t parameters;            /* decompression parameters */
     char *imgData;
@@ -1077,6 +1083,10 @@ JNIEXPORT jintArray JNICALL Java_com_gemalto_jp2_JP2Decoder_decodeJP2ByteArray(J
     
     parameters.decod_format = get_magic_format(imgData);
     parameters.cp_layer = layers;
+    parameters.DA_x0 = left;
+    parameters.DA_y0 = top;
+    parameters.DA_x1 = right;
+    parameters.DA_y1 = bottom;
     //We don't set the reduce parameter yet, because if it's too high, it would throw an error.
     //We will set it after we read the image header and find out actual number of resolutions.
 
