@@ -4,13 +4,13 @@ plugins {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk = 36
+    compileSdk = 37
     namespace = 'com.gemalto.jp2'
     defaultConfig {
         minSdk 16
-        targetSdk 36
-        versionName "1.0.5"
-        versionCode 5
+        targetSdk 37
+        versionName "1.1.0"
+        versionCode 6
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -31,7 +31,8 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    ndkVersion = '22.0.7026061'
+    ndkVersion = '23.2.8568313'
+    enableKotlin = false
 }
 
 dependencies {
@@ -46,7 +47,7 @@ dependencies {
 /*************************************************************/
 mavenPublishing {
     publishToMavenCentral()
-    //signAllPublications()
+    signAllPublications()
     coordinates("io.github.michaldvorak-gemalto", "jp2-android", "${android.defaultConfig.versionName}")
 
     pom {

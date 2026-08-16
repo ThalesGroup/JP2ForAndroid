@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk = 36
+    compileSdk = 37
     namespace = "com.gemalto.jp2.test"
 
     defaultConfig {
         applicationId "com.gemalto.openjpeg.test"
         minSdk 16
-        targetSdk 36
+        targetSdk 37
         versionCode 1
         versionName "1.0"
     }
@@ -34,7 +34,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy.eachDependency { details ->
             if (details.requested.group == 'org.jetbrains.kotlin') {
                 details.useVersion '1.8.22'
