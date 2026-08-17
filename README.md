@@ -5,7 +5,7 @@ An open-source JPEG-2000 image encoder/decoder for Android based on [OpenJPEG](h
 ## Set up
 Add dependency to your `build.gradle`:
 ```groovy
-implementation 'io.github.michaldvorak-gemalto:jp2-android:1.0.5'
+implementation 'io.github.michaldvorak-gemalto:jp2-android:1.1.0'
 ```
 
 ## Basic Usage
@@ -54,8 +54,8 @@ If you don't need the full resolution image, you can skip one or more
 resolutions during the decoding process.
 ```java
 Bitmap reducedBmp = new JP2Decoder(jp2data)
-                            .setSkipResolutions(2)
-                            .decode();
+                        .setSkipResolutions(2)
+                        .decode();
 ```
 
 
@@ -104,29 +104,25 @@ If you don't need a maximum quality image, you can trade some visual quality
 for a shorter decoding time by not decoding all the quality layers.
 ```java
 Bitmap lowQualityBmp = new JP2Decoder(jp2data)
-                              .setLayersToDecode(2)
-                              .decode();
+                           .setLayersToDecode(2)
+                           .decode();
 ```
 
-### Source Decode Region
-Sets the region of the source image that should be decoded. The region will be clipped to the 
-dimensions of the source image. Setting this value to null will result in the entire image
- being decoded.
+### Decoding Area
+If you don't want to decode the whole image, you can set the decoding area to only decode a part of it.
 
-#### Decoding
-You can obtain the width/height of image by calling
-the `readHeader()` method:
+You can obtain the dimensions of the image by calling the `readHeader()` method:
 ```java
 Header header = new JP2Decoder(jp2data).readHeader();
 int imgWidth = header.width;
 int imgHeight = header.height;
 ```
 
-If you don't want to decode the entire image, you can set the source region to be decode.
+Then you can set the area to be decoded.
 ```java
-Bitmap partOfBmp = new JP2Decoder(jp2data)
-                              .setSourceRegion(Rect(0,0,imgWidth/2,imgHeight/2))
-                              .decode();
+Bitmap topLeftQuarterBmp = new JP2Decoder(jp2data)
+                               .setDecodingArea(Rect(0,0,imgWidth/2,imgHeight/2))
+                               .decode();
 ```
 
 
